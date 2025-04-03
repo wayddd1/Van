@@ -1,57 +1,95 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import "../styles/navbar.css"
 
 export default function Navbar() {
+  const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const location = useLocation()
-
-  // Close menu when route changes
-  useEffect(() => {
-    setIsMenuOpen(false)
-  }, [location])
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
   }
 
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen)
+  }
+
+  const handleLogout = () => {
+    // Here we would handle the logout, e.g. clearing user data
+    // For this example, we'll just redirect to the login page
+    navigate("/login")
+  }
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <div className="navbar-left">
-          <Link to="/" className="navbar-logo">
-            Van<span>Ease</span>
-          </Link>
+        <Link to="/" className="navbar-logo">
+          VanEase
+        </Link>
 
-          <div className={`navbar-menu ${isMenuOpen ? "open" : ""}`}>
-            <Link to="/" className={`navbar-link ${location.pathname === "/" ? "active" : ""}`}>
-              Home
-            </Link>
-            <Link to="/van-list" className={`navbar-link ${location.pathname === "/van-list" ? "active" : ""}`}>
-              Van List
-            </Link>
-            <Link to="/book-van" className={`navbar-link ${location.pathname === "/book-van" ? "active" : ""}`}>
-              Book a Van
-            </Link>
-            <Link to="/my-bookings" className={`navbar-link ${location.pathname === "/my-bookings" ? "active" : ""}`}>
-              My Bookings
-            </Link>
-          </div>
+        <div className="menu-icon" onClick={toggleMenu}>
+          <i className={isMenuOpen ? "fas fa-times" : "fas fa-bars"}></i>
         </div>
 
-        <div className="navbar-right">
-          <Link to="/login" className="btn btn-primary navbar-login-btn">
-            Login
-          </Link>
+        <ul className={isMenuOpen ? "nav-menu active" : "nav-menu"}>
+          <li className="nav-item">
+            <Link to="/home" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+              Home
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/van-list" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+              Van List
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/book-van" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+              Book a Van
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/my-bookings" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+              My Bookings
+            </Link>
+          </li>
+        </ul>
 
-          <button className="navbar-toggle" onClick={toggleMenu}>
-            {isMenuOpen ? "✕" : "☰"}
-          </button>
+        <div className="user-profile">
+          <div
+            className="profile-pic"
+            onClick={toggleDropdown}
+            style={{ backgroundColor: "#8ed284" }} // Static background color
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          {isDropdownOpen && (
+            <div className="profile-dropdown">
+              <Link to="/profile" className="dropdown-item">
+                Profile
+              </Link>
+              <button onClick={handleLogout} className="dropdown-item">
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>
   )
 }
-

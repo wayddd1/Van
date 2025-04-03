@@ -17,9 +17,9 @@ export default function Register() {
 
   // Check if user is already logged in
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("vanease_user"))
+    const user = JSON.parse(sessionStorage.getItem("vanease_user"))
     if (user) {
-      navigate("/")
+      navigate("/login") // If the user is logged in, redirect them to the login page.
     }
   }, [navigate])
 
@@ -46,8 +46,8 @@ export default function Register() {
       return
     }
 
-    // Check if user already exists
-    const users = JSON.parse(localStorage.getItem("vanease_users")) || []
+    // Simulate a basic user registration (no localStorage)
+    const users = JSON.parse(sessionStorage.getItem("vanease_users")) || []
     const userExists = users.some((user) => user.email === formData.email)
 
     if (userExists) {
@@ -55,7 +55,7 @@ export default function Register() {
       return
     }
 
-    // Add new user
+    // Add new user (no localStorage)
     const newUser = {
       id: Date.now().toString(),
       name: formData.name,
@@ -65,13 +65,13 @@ export default function Register() {
     }
 
     users.push(newUser)
-    localStorage.setItem("vanease_users", JSON.stringify(users))
+    sessionStorage.setItem("vanease_users", JSON.stringify(users))
 
     // Auto login after registration
     const { password, ...userWithoutPassword } = newUser
-    localStorage.setItem("vanease_user", JSON.stringify(userWithoutPassword))
+    sessionStorage.setItem("vanease_user", JSON.stringify(userWithoutPassword))
 
-    navigate("/")
+    navigate("/login")
   }
 
   return (
@@ -198,4 +198,3 @@ export default function Register() {
     </div>
   )
 }
-

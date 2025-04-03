@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useState } from "react"
+import { Link } from "react-router-dom"
 import "../styles/auth.css"
 
 export default function Login() {
@@ -10,15 +10,6 @@ export default function Login() {
     password: "",
   })
   const [error, setError] = useState("")
-  const navigate = useNavigate()
-
-  // Check if user is already logged in
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("vanease_user"))
-    if (user) {
-      navigate("/")
-    }
-  }, [navigate])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -38,24 +29,7 @@ export default function Login() {
       return
     }
 
-    // Check if user exists in localStorage
-    const users = JSON.parse(localStorage.getItem("vanease_users")) || []
-    const user = users.find((u) => u.email === formData.email)
-
-    if (!user) {
-      setError("User not found. Please check your email or register.")
-      return
-    }
-
-    if (user.password !== formData.password) {
-      setError("Incorrect password. Please try again.")
-      return
-    }
-
-    // Login successful
-    const { password, ...userWithoutPassword } = user
-    localStorage.setItem("vanease_user", JSON.stringify(userWithoutPassword))
-    navigate("/")
+    // You can add further logic here for form submission if needed (e.g., calling an API)
   }
 
   return (
@@ -128,4 +102,3 @@ export default function Login() {
     </div>
   )
 }
-
