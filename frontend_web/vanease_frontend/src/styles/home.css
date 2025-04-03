@@ -1,0 +1,340 @@
+/* Hero Section */
+.hero {
+    background-color: var(--primary-color);
+    color: var(--white);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hero-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 4rem 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .hero-content {
+    z-index: 1;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+    color: var(--white);
+    margin-bottom: 1rem;
+  }
+  
+  .hero-subtitle {
+    color: var(--secondary-color);
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .hero-text {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 2rem;
+    max-width: 600px;
+  }
+  
+  .hero-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .hero-image {
+    display: none;
+  }
+  
+  /* Fleet Section */
+  .fleet-section {
+    padding: 4rem 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .section-subtitle {
+    text-align: center;
+    color: var(--light-text);
+    max-width: 700px;
+    margin: 0 auto 3rem;
+  }
+  
+  .van-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .van-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .van-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+  }
+  
+  .van-price {
+    font-weight: 700;
+    color: var(--accent-color);
+  }
+  
+  .see-more-container {
+    text-align: center;
+    margin-top: 3rem;
+  }
+  
+  /* Features Section */
+  .features-section {
+    background-color: var(--gray-100);
+    padding: 4rem 0;
+  }
+  
+  .features-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+  
+  .feature-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+  }
+  
+  .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .feature-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+  }
+  
+  .feature-description {
+    color: var(--light-text);
+  }
+  
+  /* How It Works Section */
+  .how-it-works-section {
+    padding: 4rem 0;
+  }
+  
+  .how-it-works-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  
+  .steps-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+  
+  .step-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .step-number-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+  
+  .step-number {
+    width: 3rem;
+    height: 3rem;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  
+  .step-icon {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+    width: 2rem;
+    height: 2rem;
+    background-color: var(--secondary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+  
+  .step-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+  }
+  
+  .step-description {
+    color: var(--light-text);
+    max-width: 300px;
+  }
+  
+  .steps-cta {
+    text-align: center;
+    margin-top: 3rem;
+  }
+  
+  /* Testimonials Section */
+  .testimonials-section {
+    background-color: var(--gray-100);
+    padding: 4rem 0;
+  }
+  
+  .testimonials-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+  
+  .testimonial-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+  }
+  
+  .testimonial-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .testimonial-image {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+  }
+  
+  .testimonial-name {
+    font-size: 1.125rem;
+    margin-bottom: 0.25rem;
+    color: var(--primary-color);
+  }
+  
+  .testimonial-location {
+    font-size: 0.875rem;
+    color: var(--light-text);
+    margin-bottom: 0.5rem;
+  }
+  
+  .testimonial-rating {
+    display: flex;
+  }
+  
+  .testimonial-star {
+    color: var(--gray-300);
+    margin-right: 0.25rem;
+  }
+  
+  .testimonial-star.filled {
+    color: #f59e0b;
+  }
+  
+  .testimonial-quote {
+    font-style: italic;
+    color: var(--text-color);
+    line-height: 1.6;
+  }
+  
+  @media (min-width: 768px) {
+    .hero-container {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 5rem 1.5rem;
+    }
+  
+    .hero-image {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  
+    .features-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  
+    .steps-container {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  
+    .testimonials-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .hero-title {
+      font-size: 3rem;
+    }
+  
+    .hero-subtitle {
+      font-size: 2rem;
+    }
+  
+    .features-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  
+    .steps-container {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  
+    .testimonials-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  

@@ -1,19 +1,30 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import Navbar from "./components/Navbar"
+import Home from "./app/home"
+import VanList from "./app/van-list"
+import BookVan from "./app/book-van"
+import MyBookings from "./app/my-bookings"
+import Login from "./app/login"
+import Register from "./app/register"
 import "./styles/global.css"
-function App() {
+
+export default function App() {
   return (
     <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<h1>Home Page</h1>} />
-        <Route path="/van-list" element={<h1>Van List</h1>} />
-        <Route path="/book-van" element={<h1>Book a Van</h1>} />
-        <Route path="/my-bookings" element={<h1>My Bookings</h1>} />
-        <Route path="/login" element={<h1>Login Page</h1>} />
-      </Routes>
+      <div className="app">
+        <Navbar />
+        <main>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/van-list" element={<VanList />} />
+            <Route path="/book-van" element={<BookVan />} />
+            <Route path="/my-bookings" element={<MyBookings />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Routes>
+        </main>
+      </div>
     </Router>
-  );
+  )
 }
 
-export default App;
