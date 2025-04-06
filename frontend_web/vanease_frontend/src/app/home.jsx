@@ -1,38 +1,47 @@
 import { Link } from "react-router-dom"
 import "../styles/home.css"
 import Footer from "../components/Footer"
-
+import AlphardHybrid from '../assets/Alphard-Hybrid.png';
+import ChevroletExpress from '../assets/Chevrolet-Express-Van.jpg';
+import ChryslerPacifica from "../assets/Chrysler-Pacifica.png";
+import FordTransit from "../assets/Ford-Transit.png";
+import Background from "../assets/Background.png"
 export default function Home() {
   const vans = [
     {
       id: 1,
-      name: "Compact Van",
-      description: "Perfect for small groups and city travel. Seats up to 5 passengers.",
-      price: "From $59/day",
-      image: "/placeholder.svg?height=300&width=500",
+      name: "Alphard Hybrid",
+      description:
+        "The Toyota Alphard Hybrid blends luxury and fuel efficiency, offering a smooth, quiet ride. Ideal for executive travel or comfortable family trips.",
+      price: "From ₱5,500/day",
+      image: AlphardHybrid,
     },
     {
       id: 2,
-      name: "Family Van",
-      description: "Spacious and comfortable for family trips. Seats up to 7 passengers.",
-      price: "From $79/day",
-      image: "/placeholder.svg?height=300&width=500",
+      name: "Chevrolet Express",
+      description:
+        "A reliable and powerful full-size van, perfect for large groups or long-distance travel with generous cargo space and seating for up to 12.",
+      price: "From ₱4,200/day",
+      image: ChevroletExpress,
     },
     {
       id: 3,
-      name: "Cargo Van",
-      description: "Ideal for moving goods and equipment. Up to 1000kg capacity.",
-      price: "From $89/day",
-      image: "/placeholder.svg?height=300&width=500",
+      name: "Chrysler Pacifica",
+      description:
+        "A modern and spacious minivan featuring premium interiors, advanced safety tech, and seating for 7—ideal for family getaways or city tours.",
+      price: "From ₱3,800/day",
+      image: ChryslerPacifica,
     },
     {
       id: 4,
-      name: "Luxury Van",
-      description: "Premium experience with top-tier amenities. Seats up to 6 passengers in style.",
-      price: "From $129/day",
-      image: "/placeholder.svg?height=300&width=500",
+      name: "Ford Transit",
+      description:
+        "Designed for versatility and comfort, the Ford Transit offers a premium ride with ample space—perfect for corporate events or VIP group travel.",
+      price: "From ₱6,000/day",
+      image: FordTransit,
     },
-  ]
+  ];
+  
 
   const features = [
     {
@@ -101,7 +110,7 @@ export default function Home() {
   const testimonials = [
     {
       name: "Sarah Johnson",
-      location: "Chicago, IL",
+      location: "Cebu City",
       quote:
         "VanEase made our family road trip so much easier! The van was spotless, comfortable, and the booking process was a breeze.",
       rating: 5,
@@ -109,7 +118,7 @@ export default function Home() {
     },
     {
       name: "Michael Rodriguez",
-      location: "Austin, TX",
+      location: "Cebu City",
       quote:
         "As a small business owner, I regularly rent cargo vans from VanEase. Their reliability and customer service are unmatched.",
       rating: 5,
@@ -117,7 +126,7 @@ export default function Home() {
     },
     {
       name: "Emily Chen",
-      location: "Seattle, WA",
+      location: "Cebu City",
       quote:
         "We rented a luxury van for a weekend getaway with friends. The amenities were fantastic and made our trip truly special.",
       rating: 4,
@@ -147,7 +156,7 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            <img className="hero-image" src="/placeholder.svg?height=800&width=1200" alt="Van rental fleet" />
+            <img className="hero-image" src={Background} alt="Van rental fleet" style={{width: "100%", height: "100%", objectFit: "fill" }} />
           </div>
         </section>
 
@@ -161,7 +170,7 @@ export default function Home() {
           <div className="grid grid-4">
             {vans.map((van) => (
               <div key={van.id} className="card van-card">
-                <img src={van.image || "/placeholder.svg"} alt={van.name} className="card-img" />
+                <img src={van.image || "/placeholder.svg"} alt={van.name} className="card-img" style={{width: "100%", height: "100%", objectFit: "contain" }} />
                 <div className="card-body van-card-body">
                   <h3 className="card-title">{van.name}</h3>
                   <p className="card-text">{van.description}</p>

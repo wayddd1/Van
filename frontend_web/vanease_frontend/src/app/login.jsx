@@ -75,16 +75,6 @@ export default function Login() {
             />
           </div>
 
-          <div className="auth-form-options">
-            <label className="auth-checkbox-label">
-              <input type="checkbox" className="auth-checkbox" />
-              <span>Remember me</span>
-            </label>
-            <a href="#" className="auth-forgot-password">
-              Forgot password?
-            </a>
-          </div>
-
           <button type="submit" className="auth-submit-btn">
             Login
           </button>

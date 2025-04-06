@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import "../styles/van-list.css"
+import AlphardHybrid from '../assets/Alphard-Hybrid.png';
 
 export default function VanList() {
   // Mock data for vans
@@ -16,7 +17,7 @@ export default function VanList() {
       category: "Compact",
       seats: 5,
       price: 59,
-      image: "/placeholder.svg?height=300&width=500",
+      image: AlphardHybrid,
       description:
         "Compact and fuel-efficient van perfect for city driving and small groups. Features comfortable seating, ample storage, and modern amenities for a pleasant journey.",
       available: true,
@@ -486,6 +487,7 @@ export default function VanList() {
                           src={van.image || "/placeholder.svg"}
                           alt={`${van.brand} ${van.model}`}
                           className="van-card-image"
+                          style={{width: "100%", height: "100%", objectFit: "contain" }}
                         />
                       </div>
 
