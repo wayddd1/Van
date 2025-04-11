@@ -1,94 +1,123 @@
 "use client"
 
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import "../styles/my-bookings.css"
 
 export default function MyBookings() {
-  // Mock data for booked vans
-  const allBookings = [
-    {
-      id: "B001",
-      vanType: "Family Van",
-      image: "/placeholder.svg?height=300&width=500",
-      pickupLocation: "Downtown",
-      dropoffLocation: "Airport",
-      pickupDate: "2023-08-15",
-      dropoffDate: "2023-08-20",
-      status: "confirmed",
-      price: "$395",
-      description:
-        "Spacious family van with comfortable seating for 7 passengers. Includes air conditioning, entertainment system, and ample luggage space for your journey.",
-    },
-    {
-      id: "B002",
-      vanType: "Cargo Van",
-      image: "/placeholder.svg?height=300&width=500",
-      pickupLocation: "North Branch",
-      dropoffLocation: "South Branch",
-      pickupDate: "2023-09-05",
-      dropoffDate: "2023-09-07",
-      status: "pending",
-      price: "$178",
-      description:
-        "Practical cargo van with 1000kg capacity and secure tie-down points. Perfect for moving goods with its spacious interior and easy-access side door.",
-    },
-    {
-      id: "B003",
-      vanType: "Luxury Van",
-      image: "/placeholder.svg?height=300&width=500",
-      pickupLocation: "Airport",
-      dropoffLocation: "Downtown",
-      pickupDate: "2023-10-10",
-      dropoffDate: "2023-10-15",
-      status: "completed",
-      price: "$645",
-      description:
-        "Premium luxury van featuring leather seats, climate control, and advanced entertainment system. Offers a first-class travel experience with superior comfort.",
-    },
-    {
-      id: "B004",
-      vanType: "Compact Van",
-      image: "/placeholder.svg?height=300&width=500",
-      pickupLocation: "Downtown",
-      dropoffLocation: "Downtown",
-      pickupDate: "2023-07-20",
-      dropoffDate: "2023-07-22",
-      status: "completed",
-      price: "$118",
-      description:
-        "Fuel-efficient compact van ideal for city driving. Easy to maneuver with comfortable seating for 5 passengers and good cargo space.",
-    },
-    {
-      id: "B005",
-      vanType: "Sprinter",
-      image: "/placeholder.svg?height=300&width=500",
-      pickupLocation: "South Branch",
-      dropoffLocation: "Airport",
-      pickupDate: "2023-11-15",
-      dropoffDate: "2023-11-20",
-      status: "confirmed",
-      price: "$445",
-      description:
-        "Versatile Mercedes-Benz Sprinter with high roof and spacious interior. Perfect for group travel with premium features and reliable performance.",
-    },
-    {
-      id: "B006",
-      vanType: "Cargo Van",
-      image: "/placeholder.svg?height=300&width=500",
-      pickupLocation: "North Branch",
-      dropoffLocation: "North Branch",
-      pickupDate: "2023-08-25",
-      dropoffDate: "2023-08-26",
-      status: "pending",
-      price: "$89",
-      description:
-        "Reliable cargo van with practical features for short-term deliveries. Includes backup camera and easy-load rear doors for efficient loading.",
-    },
-  ]
-
+  const navigate = useNavigate()
+  const [user, setUser] = useState(null)
   const [activeTab, setActiveTab] = useState("all")
-  const [bookings, setBookings] = useState(allBookings)
+  const [bookings, setBookings] = useState([])
+  const [allBookings, setAllBookings] = useState([])
+
+  useEffect(() => {
+    // Check if user is logged in
+    const userData = localStorage.getItem("user")
+    if (!userData) {
+      navigate("/login")
+      return
+    }
+
+    setUser(JSON.parse(userData))
+
+    // Mock bookings data
+    const mockBookings = [
+      {
+        id: "B001",
+        model: "Transit Connect",
+        brand: "Ford",
+        year: 2023,
+        rentalRate: 59,
+        vanType: "Family Van",
+        image: "/placeholder.svg?height=300&width=500",
+        pickupLocation: "Downtown",
+        dropoffLocation: "Airport",
+        pickupDate: "2023-08-15",
+        dropoffDate: "2023-08-20",
+        status: "confirmed",
+        price: "$395",
+      },
+      {
+        id: "B002",
+        model: "Sprinter",
+        brand: "Mercedes-Benz",
+        year: 2022,
+        rentalRate: 89,
+        vanType: "Cargo Van",
+        image: "/placeholder.svg?height=300&width=500",
+        pickupLocation: "North Branch",
+        dropoffLocation: "South Branch",
+        pickupDate: "2023-09-05",
+        dropoffDate: "2023-09-07",
+        status: "pending",
+        price: "$178",
+      },
+      {
+        id: "B003",
+        model: "Odyssey",
+        brand: "Honda",
+        year: 2023,
+        rentalRate: 79,
+        vanType: "Luxury Van",
+        image: "/placeholder.svg?height=300&width=500",
+        pickupLocation: "Airport",
+        dropoffLocation: "Downtown",
+        pickupDate: "2023-10-10",
+        dropoffDate: "2023-10-15",
+        status: "completed",
+        price: "$645",
+      },
+      {
+        id: "B004",
+        model: "Sienna",
+        brand: "Toyota",
+        year: 2022,
+        rentalRate: 85,
+        vanType: "Compact Van",
+        image: "/placeholder.svg?height=300&width=500",
+        pickupLocation: "Downtown",
+        dropoffLocation: "Downtown",
+        pickupDate: "2023-07-20",
+        dropoffDate: "2023-07-22",
+        status: "completed",
+        price: "$118",
+      },
+      {
+        id: "B005",
+        model: "Express",
+        brand: "Chevrolet",
+        year: 2021,
+        rentalRate: 75,
+        vanType: "Sprinter",
+        image: "/placeholder.svg?height=300&width=500",
+        pickupLocation: "South Branch",
+        dropoffLocation: "Airport",
+        pickupDate: "2023-11-15",
+        dropoffDate: "2023-11-20",
+        status: "confirmed",
+        price: "$445",
+      },
+      {
+        id: "B006",
+        model: "ProMaster",
+        brand: "RAM",
+        year: 2023,
+        rentalRate: 82,
+        vanType: "Cargo Van",
+        image: "/placeholder.svg?height=300&width=500",
+        pickupLocation: "North Branch",
+        dropoffLocation: "North Branch",
+        pickupDate: "2023-08-25",
+        dropoffDate: "2023-08-26",
+        status: "confirmed",
+        price: "$89",
+      },
+    ]
+
+    setAllBookings(mockBookings)
+    setBookings(mockBookings)
+  }, [navigate])
 
   // Filter bookings based on active tab
   const filterBookings = (tab) => {
@@ -137,6 +166,10 @@ export default function MyBookings() {
     }
   }
 
+  if (!user) {
+    return <div className="loading-container">Loading...</div>
+  }
+
   return (
     <main>
       <div className="my-bookings-container">
@@ -181,7 +214,7 @@ export default function MyBookings() {
         {bookings.length === 0 ? (
           <div className="empty-bookings">
             <p className="empty-bookings-text">No {activeTab !== "all" ? activeTab : ""} bookings found.</p>
-            <Link to="/book-van" className="btn btn-primary">
+            <Link to="/van-list" className="btn btn-primary">
               Book a Van Now
             </Link>
           </div>
@@ -194,7 +227,9 @@ export default function MyBookings() {
                   <div className="booking-card-content">
                     <div className="booking-card-header">
                       <div>
-                        <h2 className="booking-card-title">{booking.vanType}</h2>
+                        <h2 className="booking-card-title">
+                          {booking.brand} {booking.model} - {booking.vanType}
+                        </h2>
                         <p className="booking-card-id">Booking ID: {booking.id}</p>
                       </div>
                       <div>{getStatusBadge(booking.status)}</div>
@@ -231,8 +266,23 @@ export default function MyBookings() {
                       </div>
                     </div>
 
-                    <div className="booking-description">
-                      <p>{booking.description}</p>
+                    <div className="booking-specs">
+                      <div className="booking-spec">
+                        <span className="booking-spec-label">Brand:</span>
+                        <span>{booking.brand}</span>
+                      </div>
+                      <div className="booking-spec">
+                        <span className="booking-spec-label">Model:</span>
+                        <span>{booking.model}</span>
+                      </div>
+                      <div className="booking-spec">
+                        <span className="booking-spec-label">Year:</span>
+                        <span>{booking.year}</span>
+                      </div>
+                      <div className="booking-spec">
+                        <span className="booking-spec-label">Rental Rate:</span>
+                        <span>${booking.rentalRate}/day</span>
+                      </div>
                     </div>
 
                     <div className="booking-card-footer">
@@ -241,7 +291,9 @@ export default function MyBookings() {
                         <span className="booking-price-value">{booking.price}</span>
                       </div>
                       <div className="booking-actions">
-                        <button className="btn btn-primary">View Details</button>
+                        {booking.status === "pending" && <button className="btn btn-cancel">Cancel</button>}
+
+                        {booking.status === "completed" && <button className="btn btn-review">Leave Review</button>}
                       </div>
                     </div>
                   </div>
@@ -254,4 +306,3 @@ export default function MyBookings() {
     </main>
   )
 }
-

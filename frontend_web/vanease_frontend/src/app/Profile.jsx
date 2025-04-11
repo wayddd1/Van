@@ -1,37 +1,18 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useState } from "react"
 import "../styles/profile.css"
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
+    name: "John Doe",
+    email: "john.doe@example.com",
+    phone: "555-123-4567",
+    password: "password123",
   })
   const [message, setMessage] = useState({ text: "", type: "" })
-
-  // Commented out the useEffect to skip the user login check for now
-  // useEffect(() => {
-  //   const userData = localStorage.getItem("user")
-  //   if (!userData) {
-  //     navigate("/login")
-  //     return
-  //   }
-  //   const parsedUser = JSON.parse(userData)
-  //   setUser(parsedUser)
-  //   setFormData({
-  //     name: parsedUser.name || "",
-  //     email: parsedUser.email || "",
-  //     phone: parsedUser.phone || "",
-  //     password: parsedUser.password || "",
-  //   })
-  //   setLoading(false)
-  // }, [navigate])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -51,43 +32,55 @@ export default function Profile() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Commented out the submit logic for now
-    // if (!formData.name || !formData.email || !formData.password) {
-    //   setMessage({ text: "Name, email, and password are required", type: "error" })
-    //   return
-    // }
-    // const updatedUser = { ...user, ...formData }
-    // localStorage.setItem("user", JSON.stringify(updatedUser))
-    // setUser(updatedUser)
-    // setIsEditing(false)
-    // setMessage({ text: "Profile updated successfully", type: "success" })
+    setIsEditing(false)
+    setMessage({ text: "Profile updated successfully", type: "success" })
+
+    // Clear message after 3 seconds
+    setTimeout(() => {
+      setMessage({ text: "", type: "" })
+    }, 3000)
   }
 
-  // Commented out the loading state
-  // if (loading) {
-  //   return (
-  //     <div className="profile-loading">
-  //       <div className="spinner"></div>
-  //       <p>Loading profile...</p>
-  //     </div>
-  //   )
-  // }
+  const handleLogout = () => {
+    // This is just for UI demonstration
+    console.log("Logout clicked")
+  }
 
   return (
     <div className="profile-container">
       <div className="profile-card">
         <div className="profile-header">
           <h1>User Profile</h1>
-          <button onClick={toggleEdit} className={`edit-button ${isEditing ? "cancel" : ""}`}>
-            {isEditing ? "Cancel" : "Edit Profile"}
-          </button>
+          <div className="profile-header-actions">
+            <button onClick={toggleEdit} className={`edit-button ${isEditing ? "cancel" : ""}`}>
+              {isEditing ? "Cancel" : "Edit Profile"}
+            </button>
+            <button onClick={handleLogout} className="logout-button">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Logout
+            </button>
+          </div>
         </div>
 
         {message.text && <div className={`message ${message.type}`}>{message.text}</div>}
 
         <div className="profile-content">
           <div className="profile-avatar">
-            <div className="avatar">{formData.name.charAt(0).toUpperCase()}</div>
+            <div className="avatar">J</div>
             <h2>{formData.name}</h2>
             <p className="user-email">{formData.email}</p>
           </div>
@@ -209,8 +202,7 @@ export default function Profile() {
         </div>
 
         <div className="profile-footer">
-          {/* Display profile creation date */}
-          <p>Member since: {/* Replace with actual user join date */}</p>
+          <p>Member since: January 15, 2023</p>
         </div>
       </div>
     </div>

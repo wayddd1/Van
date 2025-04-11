@@ -4,9 +4,11 @@ import Home from "./app/home"
 import VanList from "./app/van-list"
 import BookVan from "./app/book-van"
 import MyBookings from "./app/my-bookings"
-import Login from "./app/Login"
+import Login from "./app/login"
 import Register from "./app/register"
-import Profile from "./app/Profile"
+import Profile from "./app/profile"
+import ManagerVans from "./app/manager-vans"
+import ManagerBookings from "./app/manager-bookings"
 import "./styles/global.css"
 
 export default function App() {
@@ -24,7 +26,8 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />
-
+            <Route path="/manager-vans" element={<ManagerVans />} />
+            <Route path="/manager-bookings" element={<ManagerBookings />} />
           </Routes>
         </main>
       </div>

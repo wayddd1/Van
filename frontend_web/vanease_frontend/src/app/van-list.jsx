@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import "../styles/van-list.css"
-import AlphardHybrid from '../assets/Alphard-Hybrid.png';
+import AlphardHybrid from "../assets/Alphard-Hybrid.png"
 
 export default function VanList() {
   // Mock data for vans
@@ -13,13 +13,8 @@ export default function VanList() {
       model: "Transit Connect",
       brand: "Ford",
       year: 2023,
-      transmission: "Automatic",
-      category: "Compact",
-      seats: 5,
-      price: 59,
+      rentalRate: 59,
       image: AlphardHybrid,
-      description:
-        "Compact and fuel-efficient van perfect for city driving and small groups. Features comfortable seating, ample storage, and modern amenities for a pleasant journey.",
       available: true,
     },
     {
@@ -27,13 +22,8 @@ export default function VanList() {
       model: "Sprinter",
       brand: "Mercedes-Benz",
       year: 2022,
-      transmission: "Automatic",
-      category: "Cargo",
-      seats: 3,
-      price: 89,
+      rentalRate: 89,
       image: "/placeholder.svg?height=300&width=500",
-      description:
-        "Professional-grade cargo van with spacious interior and high roof. Ideal for moving goods, equipment, or business deliveries with its reliable performance.",
       available: false,
     },
     {
@@ -41,13 +31,8 @@ export default function VanList() {
       model: "Odyssey",
       brand: "Honda",
       year: 2023,
-      transmission: "Automatic",
-      category: "Family",
-      seats: 7,
-      price: 79,
+      rentalRate: 79,
       image: "/placeholder.svg?height=300&width=500",
-      description:
-        "Family-friendly minivan with versatile seating, entertainment options, and safety features. Perfect for family trips with plenty of space for passengers and luggage.",
       available: true,
     },
     {
@@ -55,13 +40,8 @@ export default function VanList() {
       model: "Sienna",
       brand: "Toyota",
       year: 2022,
-      transmission: "Automatic",
-      category: "Family",
-      seats: 8,
-      price: 85,
+      rentalRate: 85,
       image: "/placeholder.svg?height=300&width=500",
-      description:
-        "Spacious and comfortable family van with hybrid efficiency. Features advanced safety systems, entertainment options, and flexible seating arrangements.",
       available: false,
     },
     {
@@ -69,13 +49,8 @@ export default function VanList() {
       model: "Express",
       brand: "Chevrolet",
       year: 2021,
-      transmission: "Automatic",
-      category: "Cargo",
-      seats: 2,
-      price: 75,
+      rentalRate: 75,
       image: "/placeholder.svg?height=300&width=500",
-      description:
-        "Reliable cargo van with powerful engine and substantial payload capacity. Well-suited for commercial use with its durable construction and practical features.",
       available: true,
     },
     {
@@ -83,13 +58,8 @@ export default function VanList() {
       model: "ProMaster",
       brand: "RAM",
       year: 2023,
-      transmission: "Manual",
-      category: "Cargo",
-      seats: 3,
-      price: 82,
+      rentalRate: 82,
       image: "/placeholder.svg?height=300&width=500",
-      description:
-        "Versatile cargo van with front-wheel drive and low load floor. Offers excellent maneuverability and cargo access through multiple entry points.",
       available: false,
     },
     {
@@ -97,13 +67,8 @@ export default function VanList() {
       model: "Carnival",
       brand: "Kia",
       year: 2023,
-      transmission: "Automatic",
-      category: "Family",
-      seats: 8,
-      price: 88,
+      rentalRate: 88,
       image: "/placeholder.svg?height=300&width=500",
-      description:
-        "Modern family van with SUV-inspired styling and premium features. Includes advanced tech, comfortable seating, and impressive safety credentials.",
       available: true,
     },
     {
@@ -111,13 +76,8 @@ export default function VanList() {
       model: "Metris",
       brand: "Mercedes-Benz",
       year: 2022,
-      transmission: "Automatic",
-      category: "Luxury",
-      seats: 7,
-      price: 129,
+      rentalRate: 129,
       image: "/placeholder.svg?height=300&width=500",
-      description:
-        "Premium passenger van with luxury appointments and refined driving experience. Combines comfort, style, and performance for discerning travelers.",
       available: false,
     },
     {
@@ -125,13 +85,8 @@ export default function VanList() {
       model: "Transit",
       brand: "Ford",
       year: 2023,
-      transmission: "Automatic",
-      category: "Cargo",
-      seats: 3,
-      price: 79,
+      rentalRate: 79,
       image: "/placeholder.svg?height=300&width=500",
-      description:
-        "Versatile full-size cargo van with multiple roof heights and lengths. Offers excellent utility, driver-assist features, and comfortable cabin.",
       available: true,
     },
     {
@@ -139,13 +94,8 @@ export default function VanList() {
       model: "NV200",
       brand: "Nissan",
       year: 2021,
-      transmission: "Manual",
-      category: "Compact",
-      seats: 2,
-      price: 55,
+      rentalRate: 55,
       image: "/placeholder.svg?height=300&width=500",
-      description:
-        "Compact cargo van with excellent fuel economy and city-friendly dimensions. Perfect for small businesses with its practical design and low operating costs.",
       available: true,
     },
     {
@@ -153,13 +103,8 @@ export default function VanList() {
       model: "Pacifica",
       brand: "Chrysler",
       year: 2023,
-      transmission: "Automatic",
-      category: "Luxury",
-      seats: 7,
-      price: 115,
+      rentalRate: 115,
       image: "/placeholder.svg?height=300&width=500",
-      description:
-        "Upscale family van with hybrid option and innovative features. Includes premium materials, advanced technology, and versatile seating configurations.",
       available: false,
     },
     {
@@ -167,13 +112,8 @@ export default function VanList() {
       model: "Grand Caravan",
       brand: "Dodge",
       year: 2020,
-      transmission: "Automatic",
-      category: "Family",
-      seats: 7,
-      price: 65,
+      rentalRate: 65,
       image: "/placeholder.svg?height=300&width=500",
-      description:
-        "Practical family van with Stow 'n Go seating and budget-friendly pricing. Offers reliable performance and flexible interior space for various needs.",
       available: true,
     },
   ]
@@ -182,8 +122,6 @@ export default function VanList() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filters, setFilters] = useState({
     brand: [],
-    category: [],
-    transmission: [],
     year: [],
   })
   const [showFilters, setShowFilters] = useState(false)
@@ -191,8 +129,6 @@ export default function VanList() {
 
   // Extract unique values for filter options
   const brands = [...new Set(allVans.map((van) => van.brand))]
-  const categories = [...new Set(allVans.map((van) => van.category))]
-  const transmissions = [...new Set(allVans.map((van) => van.transmission))]
   const years = [...new Set(allVans.map((van) => van.year))]
 
   // Apply filters and search
@@ -212,23 +148,15 @@ export default function VanList() {
       filteredVans = filteredVans.filter((van) => filters.brand.includes(van.brand))
     }
 
-    if (filters.category.length > 0) {
-      filteredVans = filteredVans.filter((van) => filters.category.includes(van.category))
-    }
-
-    if (filters.transmission.length > 0) {
-      filteredVans = filteredVans.filter((van) => filters.transmission.includes(van.transmission))
-    }
-
     if (filters.year.length > 0) {
       filteredVans = filteredVans.filter((van) => filters.year.includes(van.year))
     }
 
     // Apply sorting
     if (sortBy === "price-low") {
-      filteredVans.sort((a, b) => a.price - b.price)
+      filteredVans.sort((a, b) => a.rentalRate - b.rentalRate)
     } else if (sortBy === "price-high") {
-      filteredVans.sort((a, b) => b.price - a.price)
+      filteredVans.sort((a, b) => b.rentalRate - a.rentalRate)
     } else if (sortBy === "year-new") {
       filteredVans.sort((a, b) => b.year - a.year)
     } else if (sortBy === "year-old") {
@@ -259,8 +187,6 @@ export default function VanList() {
   const clearFilters = () => {
     setFilters({
       brand: [],
-      category: [],
-      transmission: [],
       year: [],
     })
     setSearchTerm("")
@@ -322,40 +248,6 @@ export default function VanList() {
             </div>
 
             <div className="filter-group">
-              <h3 className="filter-title">Category</h3>
-              <div className="filter-options">
-                {categories.map((category) => (
-                  <label key={category} className="filter-option">
-                    <input
-                      type="checkbox"
-                      className="filter-checkbox"
-                      checked={filters.category.includes(category)}
-                      onChange={() => toggleFilter("category", category)}
-                    />
-                    {category}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="filter-group">
-              <h3 className="filter-title">Transmission</h3>
-              <div className="filter-options">
-                {transmissions.map((transmission) => (
-                  <label key={transmission} className="filter-option">
-                    <input
-                      type="checkbox"
-                      className="filter-checkbox"
-                      checked={filters.transmission.includes(transmission)}
-                      onChange={() => toggleFilter("transmission", transmission)}
-                    />
-                    {transmission}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="filter-group">
               <h3 className="filter-title">Year</h3>
               <div className="filter-options">
                 {years.map((year) => (
@@ -408,40 +300,6 @@ export default function VanList() {
             </div>
 
             <div className="filter-group">
-              <h3 className="filter-title">Category</h3>
-              <div className="filter-options">
-                {categories.map((category) => (
-                  <label key={category} className="filter-option">
-                    <input
-                      type="checkbox"
-                      className="filter-checkbox"
-                      checked={filters.category.includes(category)}
-                      onChange={() => toggleFilter("category", category)}
-                    />
-                    {category}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="filter-group">
-              <h3 className="filter-title">Transmission</h3>
-              <div className="filter-options">
-                {transmissions.map((transmission) => (
-                  <label key={transmission} className="filter-option">
-                    <input
-                      type="checkbox"
-                      className="filter-checkbox"
-                      checked={filters.transmission.includes(transmission)}
-                      onChange={() => toggleFilter("transmission", transmission)}
-                    />
-                    {transmission}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="filter-group">
               <h3 className="filter-title">Year</h3>
               <div className="filter-options">
                 {years.map((year) => (
@@ -487,7 +345,7 @@ export default function VanList() {
                           src={van.image || "/placeholder.svg"}
                           alt={`${van.brand} ${van.model}`}
                           className="van-card-image"
-                          style={{width: "100%", height: "100%", objectFit: "contain" }}
+                          style={{ width: "100%", height: "100%", objectFit: "contain" }}
                         />
                       </div>
 
@@ -501,30 +359,26 @@ export default function VanList() {
                               {van.available ? "Available" : "Not Available"}
                             </span>
                           </div>
-                          <span className="van-card-price">${van.price}/day</span>
+                          <span className="van-card-price">${van.rentalRate}/day</span>
                         </div>
 
                         <div className="van-card-specs">
+                          <div className="van-spec">
+                            <span className="van-spec-label">Brand:</span>
+                            <span>{van.brand}</span>
+                          </div>
+                          <div className="van-spec">
+                            <span className="van-spec-label">Model:</span>
+                            <span>{van.model}</span>
+                          </div>
                           <div className="van-spec">
                             <span className="van-spec-label">Year:</span>
                             <span>{van.year}</span>
                           </div>
                           <div className="van-spec">
-                            <span className="van-spec-label">Category:</span>
-                            <span>{van.category}</span>
+                            <span className="van-spec-label">Rental Rate:</span>
+                            <span>${van.rentalRate}/day</span>
                           </div>
-                          <div className="van-spec">
-                            <span className="van-spec-label">Transmission:</span>
-                            <span>{van.transmission}</span>
-                          </div>
-                          <div className="van-spec">
-                            <span className="van-spec-label">Seats:</span>
-                            <span>{van.seats}</span>
-                          </div>
-                        </div>
-
-                        <div className="van-card-description">
-                          <p>{van.description}</p>
                         </div>
 
                         <div className="van-card-actions">
@@ -548,4 +402,3 @@ export default function VanList() {
     </main>
   )
 }
-
