@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
+import ManagerNavbar from "../components/ManagerNavbar"
 import "../styles/manager-vans.css"
 
 export default function ManagerVans() {
-  const [vans, setVans] = useState([
+  // Static mock data for vans
+  const mockVans = [
     {
-      id: 1,
+      id: "V001",
       model: "Transit Connect",
       brand: "Ford",
       year: 2023,
@@ -14,42 +16,86 @@ export default function ManagerVans() {
       plateNumber: "ABC-1234",
       available: true,
       image: "/placeholder.svg?height=300&width=500",
+      features: ["Air Conditioning", "Bluetooth", "Backup Camera", "Cruise Control"],
+      capacity: 5,
+      fuelType: "Gasoline",
+      transmission: "Automatic",
     },
     {
-      id: 2,
+      id: "V002",
       model: "Sprinter",
       brand: "Mercedes-Benz",
       year: 2022,
       rentalRate: 89,
       plateNumber: "XYZ-5678",
-      available: false,
-      image: "/placeholder.svg?height=300&width=500",
-    },
-    {
-      id: 3,
-      model: "Odyssey",
-      brand: "Honda",
-      year: 2023,
-      rentalRate: 79,
-      plateNumber: "DEF-9012",
       available: true,
       image: "/placeholder.svg?height=300&width=500",
+      features: ["Air Conditioning", "Bluetooth", "Navigation", "Backup Camera", "Cruise Control"],
+      capacity: 12,
+      fuelType: "Diesel",
+      transmission: "Automatic",
     },
-  ])
+    {
+      id: "V003",
+      model: "ProMaster",
+      brand: "Ram",
+      year: 2023,
+      rentalRate: 75,
+      plateNumber: "DEF-9012",
+      available: false,
+      image: "/placeholder.svg?height=300&width=500",
+      features: ["Air Conditioning", "Bluetooth", "Backup Camera"],
+      capacity: 8,
+      fuelType: "Gasoline",
+      transmission: "Automatic",
+    },
+    {
+      id: "V004",
+      model: "Express",
+      brand: "Chevrolet",
+      year: 2021,
+      rentalRate: 65,
+      plateNumber: "GHI-3456",
+      available: true,
+      image: "/placeholder.svg?height=300&width=500",
+      features: ["Air Conditioning", "Bluetooth", "Backup Camera", "Cruise Control"],
+      capacity: 10,
+      fuelType: "Gasoline",
+      transmission: "Automatic",
+    },
+    {
+      id: "V005",
+      model: "Transit",
+      brand: "Ford",
+      year: 2022,
+      rentalRate: 70,
+      plateNumber: "JKL-7890",
+      available: true,
+      image: "/placeholder.svg?height=300&width=500",
+      features: ["Air Conditioning", "Bluetooth", "Navigation", "Backup Camera", "Cruise Control"],
+      capacity: 15,
+      fuelType: "Diesel",
+      transmission: "Automatic",
+    },
+  ]
 
+  // Minimal state for UI functionality
   const [formData, setFormData] = useState({
-    id: null,
     model: "",
     brand: "",
     year: new Date().getFullYear(),
     rentalRate: "",
     plateNumber: "",
     available: true,
-    image: "/placeholder.svg?height=300&width=500",
+    capacity: 5,
+    fuelType: "Gasoline",
+    transmission: "Automatic",
   })
 
-  const [isEditing, setIsEditing] = useState(false)
-  const [message, setMessage] = useState({ text: "", type: "" })
+  // State for image upload
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
+  const fileInputRef = useRef(null)
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -59,281 +105,319 @@ export default function ManagerVans() {
     }))
   }
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setImageFile(file)
+
+      // Create a preview URL for the image
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleImageClick = () => {
+    // Trigger the file input click when the preview or placeholder is clicked
+    fileInputRef.current.click()
+  }
+
+  const handleRemoveImage = (e) => {
+    e.stopPropagation() // Prevent triggering the parent click handler
+    setImageFile(null)
+    setImagePreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
-
-    // Validation
-    if (!formData.model || !formData.brand || !formData.rentalRate || !formData.plateNumber) {
-      setMessage({ text: "Please fill in all required fields", type: "error" })
-      return
-    }
-
-    if (isEditing) {
-      // Update existing van
-      setVans((prev) => prev.map((van) => (van.id === formData.id ? formData : van)))
-      setMessage({ text: "Van updated successfully", type: "success" })
-    } else {
-      // Add new van
-      const newVan = {
-        ...formData,
-        id: Date.now(),
-      }
-      setVans((prev) => [...prev, newVan])
-      setMessage({ text: "Van added successfully", type: "success" })
-    }
+    // In a real app, this would add or update a van and upload the image
+    alert("Form submitted! In a real app, this would add a new van with the uploaded image.")
 
     // Reset form
-    resetForm()
-
-    // Clear message after 3 seconds
-    setTimeout(() => {
-      setMessage({ text: "", type: "" })
-    }, 3000)
-  }
-
-  const handleEdit = (van) => {
-    setFormData(van)
-    setIsEditing(true)
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
-
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this van?")) {
-      setVans((prev) => prev.filter((van) => van.id !== id))
-      setMessage({ text: "Van deleted successfully", type: "success" })
-
-      // Clear message after 3 seconds
-      setTimeout(() => {
-        setMessage({ text: "", type: "" })
-      }, 3000)
-    }
-  }
-
-  const resetForm = () => {
     setFormData({
-      id: null,
       model: "",
       brand: "",
       year: new Date().getFullYear(),
       rentalRate: "",
       plateNumber: "",
       available: true,
-      image: "/placeholder.svg?height=300&width=500",
+      capacity: 5,
+      fuelType: "Gasoline",
+      transmission: "Automatic",
     })
-    setIsEditing(false)
+    setImageFile(null)
+    setImagePreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
   }
 
   return (
-    <div className="manager-vans-container">
-      <div className="manager-vans-header">
-        <h1>Van Management</h1>
-        <p>Add, edit, and manage the van fleet</p>
-      </div>
+    <>
+      <ManagerNavbar />
+      <div className="manager-vans-container">
+        <div className="manager-vans-header">
+          <h1>Van Management</h1>
+          <p>Add, edit, and manage the van fleet</p>
+        </div>
 
-      {message.text && <div className={`message ${message.type}`}>{message.text}</div>}
+        <div className="van-form-section">
+          <h2>Add New Van</h2>
+          <form onSubmit={handleSubmit} className="van-form">
+            {/* Image Upload Section */}
+            <div className="image-upload-container">
+              <div
+                className="image-upload-preview"
+                onClick={handleImageClick}
+                style={{
+                  backgroundImage: imagePreview
+                    ? `url(${imagePreview})`
+                    : 'url("/placeholder.svg?height=300&width=500")',
+                }}
+              >
+                {!imagePreview && (
+                  <div className="upload-placeholder">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path>
+                      <line x1="16" y1="5" x2="22" y2="5"></line>
+                      <line x1="19" y1="2" x2="19" y2="8"></line>
+                      <circle cx="9" cy="9" r="2"></circle>
+                      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
+                    </svg>
+                    <span>Click to upload van image</span>
+                  </div>
+                )}
+                {imagePreview && (
+                  <button type="button" className="remove-image-btn" onClick={handleRemoveImage} title="Remove image">
+                    ✕
+                  </button>
+                )}
+              </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                accept="image/*"
+                className="image-upload-input"
+                id="van-image"
+              />
+              <p className="image-upload-help">Click on the area above to upload an image of the van</p>
+            </div>
 
-      <div className="van-form-section">
-        <h2>{isEditing ? "Edit Van" : "Add New Van"}</h2>
-        <form onSubmit={handleSubmit} className="van-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="brand">Brand*</label>
-              <input
-                type="text"
-                id="brand"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                placeholder="e.g. Ford, Toyota"
-                required
-              />
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="brand">Brand</label>
+                <input
+                  type="text"
+                  id="brand"
+                  name="brand"
+                  value={formData.brand}
+                  onChange={handleChange}
+                  placeholder="e.g. Ford, Mercedes-Benz"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="model">Model</label>
+                <input
+                  type="text"
+                  id="model"
+                  name="model"
+                  value={formData.model}
+                  onChange={handleChange}
+                  placeholder="e.g. Transit, Sprinter"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="year">Year</label>
+                <input
+                  type="number"
+                  id="year"
+                  name="year"
+                  value={formData.year}
+                  onChange={handleChange}
+                  min="2000"
+                  max={new Date().getFullYear() + 1}
+                  required
+                />
+              </div>
             </div>
-            <div className="form-group">
-              <label htmlFor="model">Model*</label>
-              <input
-                type="text"
-                id="model"
-                name="model"
-                value={formData.model}
-                onChange={handleChange}
-                placeholder="e.g. Transit, Sienna"
-                required
-              />
-            </div>
-          </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="year">Year*</label>
-              <input
-                type="number"
-                id="year"
-                name="year"
-                value={formData.year}
-                onChange={handleChange}
-                min="2000"
-                max={new Date().getFullYear() + 1}
-                required
-              />
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="plateNumber">License Plate</label>
+                <input
+                  type="text"
+                  id="plateNumber"
+                  name="plateNumber"
+                  value={formData.plateNumber}
+                  onChange={handleChange}
+                  placeholder="e.g. ABC-1234"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="rentalRate">Daily Rental Rate (₱)</label>
+                <input
+                  type="number"
+                  id="rentalRate"
+                  name="rentalRate"
+                  value={formData.rentalRate}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 59.99"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="capacity">Passenger Capacity</label>
+                <input
+                  type="number"
+                  id="capacity"
+                  name="capacity"
+                  value={formData.capacity}
+                  onChange={handleChange}
+                  min="1"
+                  max="20"
+                  required
+                />
+              </div>
             </div>
-            <div className="form-group">
-              <label htmlFor="plateNumber">Plate Number*</label>
-              <input
-                type="text"
-                id="plateNumber"
-                name="plateNumber"
-                value={formData.plateNumber}
-                onChange={handleChange}
-                placeholder="e.g. ABC-1234"
-                required
-              />
-            </div>
-          </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="rentalRate">Daily Rental Rate ($)*</label>
-              <input
-                type="number"
-                id="rentalRate"
-                name="rentalRate"
-                value={formData.rentalRate}
-                onChange={handleChange}
-                min="1"
-                step="0.01"
-                placeholder="e.g. 59.99"
-                required
-              />
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="fuelType">Fuel Type</label>
+                <input
+                  type="text"
+                  id="fuelType"
+                  name="fuelType"
+                  value={formData.fuelType}
+                  onChange={handleChange}
+                  placeholder="e.g. Gasoline, Diesel"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="transmission">Transmission</label>
+                <input
+                  type="text"
+                  id="transmission"
+                  name="transmission"
+                  value={formData.transmission}
+                  onChange={handleChange}
+                  placeholder="e.g. Automatic, Manual"
+                  required
+                />
+              </div>
             </div>
-            <div className="form-group checkbox-group">
+
+            <div className="checkbox-group">
               <label className="checkbox-label">
                 <input type="checkbox" name="available" checked={formData.available} onChange={handleChange} />
-                Available for Rent
+                Available for Booking
               </label>
             </div>
-          </div>
 
-          <div className="form-row">
-            <div className="form-group full-width">
-              <label htmlFor="image">Image URL</label>
-              <input
-                type="text"
-                id="image"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                placeholder="Enter image URL or leave default"
-              />
-            </div>
-          </div>
-
-          <div className="form-actions">
-            {isEditing && (
-              <button type="button" className="btn btn-secondary" onClick={resetForm}>
-                Cancel
+            <div className="form-actions">
+              <button type="submit" className="btn btn-primary">
+                Add Van
               </button>
-            )}
-            <button type="submit" className="btn btn-primary">
-              {isEditing ? "Update Van" : "Add Van"}
-            </button>
-          </div>
-        </form>
-      </div>
+            </div>
+          </form>
+        </div>
 
-      <div className="van-list-section">
-        <h2>Van Fleet</h2>
-        {vans.length === 0 ? (
-          <div className="empty-state">
-            <p>No vans in the fleet yet. Add your first van above.</p>
-          </div>
-        ) : (
-          <div className="van-table-container">
-            <table className="van-table">
-              <thead>
-                <tr>
-                  <th>Image</th>
-                  <th>Brand</th>
-                  <th>Model</th>
-                  <th>Year</th>
-                  <th>Plate Number</th>
-                  <th>Daily Rate</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {vans.map((van) => (
-                  <tr key={van.id}>
-                    <td>
-                      <img
-                        src={van.image || "/placeholder.svg?height=60&width=100"}
-                        alt={`${van.brand} ${van.model}`}
-                        className="van-thumbnail"
-                      />
-                    </td>
-                    <td>{van.brand}</td>
-                    <td>{van.model}</td>
-                    <td>{van.year}</td>
-                    <td>{van.plateNumber}</td>
-                    <td>${van.rentalRate}</td>
-                    <td>
-                      <span className={`status-badge ${van.available ? "available" : "unavailable"}`}>
-                        {van.available ? "Available" : "Unavailable"}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <button
-                          className="btn btn-edit"
-                          onClick={() => handleEdit(van)}
-                          aria-label={`Edit ${van.brand} ${van.model}`}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                          </svg>
-                        </button>
-                        <button
-                          className="btn btn-delete"
-                          onClick={() => handleDelete(van.id)}
-                          aria-label={`Delete ${van.brand} ${van.model}`}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
+        <div className="van-list-section">
+          <h2>Van Fleet</h2>
+          {mockVans.length === 0 ? (
+            <div className="empty-state">
+              <p>No vans in the fleet. Add your first van above.</p>
+            </div>
+          ) : (
+            <div className="van-table-container">
+              <table className="van-table">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Van Details</th>
+                    <th>License Plate</th>
+                    <th>Daily Rate</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {mockVans.map((van) => (
+                    <tr key={van.id}>
+                      <td>
+                        <img
+                          src={van.image || "/placeholder.svg"}
+                          alt={`${van.brand} ${van.model}`}
+                          className="van-thumbnail"
+                        />
+                      </td>
+                      <td>
+                        <div>
+                          <strong>
+                            {van.brand} {van.model} ({van.year})
+                          </strong>
+                          <div>Capacity: {van.capacity} passengers</div>
+                          <div>
+                            {van.fuelType} • {van.transmission}
+                          </div>
+                        </div>
+                      </td>
+                      <td>{van.plateNumber}</td>
+                      <td>₱{van.rentalRate}/day</td>
+                      <td>
+                        <span className={`status-badge ${van.available ? "available" : "unavailable"}`}>
+                          {van.available ? "Available" : "Unavailable"}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="action-buttons">
+                          <button className="btn-view" title="View">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                              <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }

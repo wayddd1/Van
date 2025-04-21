@@ -1,284 +1,346 @@
 .manager-vans-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem;
-  }
-  
-  .manager-vans-header {
-    margin-bottom: 2rem;
-  }
-  
-  .manager-vans-header h1 {
-    font-size: 2rem;
-    color: #34572e;
-    margin-bottom: 0.5rem;
-  }
-  
-  .manager-vans-header p {
-    color: #666;
-  }
-  
-  .message {
-    padding: 1rem;
-    border-radius: 5px;
-    margin-bottom: 1.5rem;
-    text-align: center;
-  }
-  
-  .message.success {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #c8e6c9;
-  }
-  
-  .message.error {
-    background-color: #ffebee;
-    color: #c62828;
-    border: 1px solid #ffcdd2;
-  }
-  
-  .van-form-section {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-  }
-  
-  .van-form-section h2 {
-    font-size: 1.5rem;
-    color: #34572e;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .van-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-  }
-  
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.manager-vans-header {
+  margin-bottom: 2rem;
+}
+
+.manager-vans-header h1 {
+  font-size: 2rem;
+  color: #34572e;
+  margin-bottom: 0.5rem;
+}
+
+.manager-vans-header p {
+  color: #666;
+}
+
+.van-form-section {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.van-form-section h2 {
+  font-size: 1.5rem;
+  color: #34572e;
+  margin-bottom: 1.5rem;
+}
+
+.van-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #34572e;
+  box-shadow: 0 0 0 2px rgba(52, 87, 46, 0.2);
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #34572e;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2a4625;
+}
+
+.btn-secondary {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.btn-secondary:hover {
+  background-color: #e5e5e5;
+}
+
+.van-list-section {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+}
+
+.van-list-section h2 {
+  font-size: 1.5rem;
+  color: #34572e;
+  margin-bottom: 1.5rem;
+}
+
+.van-table-container {
+  overflow-x: auto;
+}
+
+.van-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.van-table th,
+.van-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.van-table th {
+  font-weight: 600;
+  color: #555;
+  background-color: #f9f9f9;
+}
+
+.van-thumbnail {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.available {
+  background-color: #e6f4ea;
+  color: #34a853;
+}
+
+.status-badge.unavailable {
+  background-color: #fce8e6;
+  color: #ea4335;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-view,
+.btn-edit,
+.btn-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-view {
+  background-color: #e6f4ea;
+  color: #34a853;
+}
+
+.btn-view:hover {
+  background-color: #d2ebd3;
+}
+
+.btn-edit {
+  background-color: #e8f0fe;
+  color: #4285f4;
+}
+
+.btn-edit:hover {
+  background-color: #d2e3fc;
+}
+
+.btn-delete {
+  background-color: #fce8e6;
+  color: #ea4335;
+}
+
+.btn-delete:hover {
+  background-color: #f6d2cf;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 0;
+  color: #666;
+}
+
+.message {
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.message.success {
+  background-color: #e6f4ea;
+  color: #34a853;
+  border: 1px solid #d2ebd3;
+}
+
+.message.error {
+  background-color: #fce8e6;
+  color: #ea4335;
+  border: 1px solid #f6d2cf;
+}
+
+/* Image upload styles */
+.image-upload-container {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-upload-preview {
+  width: 100%;
+  max-width: 400px;
+  height: 250px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: border-color 0.2s;
+  margin-bottom: 0.5rem;
+}
+
+.image-upload-preview:hover {
+  border-color: #34572e;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+}
+
+.upload-placeholder svg {
+  color: #34572e;
+  width: 32px;
+  height: 32px;
+}
+
+.image-upload-input {
+  display: none;
+}
+
+.image-upload-help {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.image-upload-preview:hover .remove-image-btn {
+  opacity: 1;
+}
+
+@media (min-width: 640px) {
   .form-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.25rem;
+    grid-template-columns: repeat(2, 1fr);
   }
-  
-  .form-group {
-    flex: 1;
-    min-width: 250px;
+}
+
+@media (min-width: 768px) {
+  .form-row {
+    grid-template-columns: repeat(3, 1fr);
   }
-  
-  .form-group.full-width {
-    flex-basis: 100%;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: #333;
-  }
-  
-  .form-group input[type="text"],
-  .form-group input[type="number"] {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-    transition: border-color 0.3s;
-  }
-  
-  .form-group input:focus {
-    border-color: #3daf2c;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(61, 175, 44, 0.1);
-  }
-  
-  .checkbox-group {
-    display: flex;
-    align-items: center;
-    margin-top: 2rem;
-  }
-  
-  .checkbox-label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-  }
-  
-  .checkbox-label input {
-    margin-right: 0.5rem;
-    width: 18px;
-    height: 18px;
-  }
-  
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-  
-  .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-    font-size: 1rem;
-  }
-  
-  .btn-primary {
-    background-color: #34572e;
-    color: white;
-  }
-  
-  .btn-primary:hover {
-    background-color: #3daf2c;
-  }
-  
-  .btn-secondary {
-    background-color: #f3f4f6;
-    color: #374151;
-  }
-  
-  .btn-secondary:hover {
-    background-color: #e5e7eb;
-  }
-  
-  .van-list-section {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    padding: 1.5rem;
-  }
-  
-  .van-list-section h2 {
-    font-size: 1.5rem;
-    color: #34572e;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .empty-state {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: #666;
-    background-color: #f9f9f9;
-    border-radius: 4px;
-  }
-  
-  .van-table-container {
-    overflow-x: auto;
-  }
-  
-  .van-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .van-table th,
-  .van-table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .van-table th {
-    background-color: #f9f9f9;
-    font-weight: 600;
-    color: #333;
-  }
-  
-  .van-table tr:hover {
-    background-color: #f9f9f9;
-  }
-  
-  .van-thumbnail {
-    width: 80px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 4px;
-  }
-  
-  .status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  
-  .status-badge.available {
-    background-color: rgba(61, 175, 44, 0.1);
-    color: #3daf2c;
-  }
-  
-  .status-badge.unavailable {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-  }
-  
-  .action-buttons {
-    display: flex;
-    gap: 0.5rem;
-  }
-  
-  .btn-edit,
-  .btn-delete {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  
-  .btn-edit {
-    background-color: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
-  }
-  
-  .btn-edit:hover {
-    background-color: rgba(59, 130, 246, 0.2);
-  }
-  
-  .btn-delete {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-  }
-  
-  .btn-delete:hover {
-    background-color: rgba(239, 68, 68, 0.2);
-  }
-  
-  @media (max-width: 768px) {
-    .form-row {
-      flex-direction: column;
-      gap: 1rem;
-    }
-  
-    .form-group {
-      min-width: 100%;
-    }
-  
-    .van-table th,
-    .van-table td {
-      padding: 0.75rem 0.5rem;
-      font-size: 0.875rem;
-    }
-  
-    .van-thumbnail {
-      width: 60px;
-      height: 40px;
-    }
-  }
-  
+}

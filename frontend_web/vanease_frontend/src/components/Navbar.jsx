@@ -1,93 +1,84 @@
 "use client"
 
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import "../styles/navbar.css"
 
 export default function Navbar() {
-  const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(true) // Always show as logged in for demo
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    // Close mobile menu when route changes
+    setIsMenuOpen(false)
+  }, [location.pathname])
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
   }
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen)
-  }
-
   const handleLogout = () => {
-    // Here we would handle the logout, e.g. clearing user data
-    // For this example, we'll just redirect to the login page
-    navigate("/login")
+    // Simply redirect to home page
+    navigate("/")
   }
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
-          VanEase
+          <span className="logo-text">VanEase</span>
         </Link>
 
-        <div className="menu-icon" onClick={toggleMenu}>
-          <i className={isMenuOpen ? "fas fa-times" : "fas fa-bars"}></i>
+        <div className="navbar-toggle" onClick={toggleMenu} aria-label="Toggle navigation menu">
+          <span className="toggle-icon">{isMenuOpen ? "✕" : "☰"}</span>
         </div>
 
-        <ul className={isMenuOpen ? "nav-menu active" : "nav-menu"}>
-          <li className="nav-item">
-            <Link to="/home" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+        <div className={`navbar-menu ${isMenuOpen ? "active" : ""}`}>
+          <div className="navbar-links">
+            <Link to="/" className="navbar-link">
               Home
             </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/van-list" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-              Van List
+            <Link to="/van-list" className="navbar-link">
+              Our Vans
             </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/book-van" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+            <Link to="/book-van" className="navbar-link">
               Book a Van
             </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/my-bookings" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-              My Bookings
-            </Link>
-          </li>
-        </ul>
 
-        <div className="user-profile">
-          <div
-            className="profile-pic"
-            onClick={toggleDropdown}
-            style={{ backgroundColor: "#8ed284" }} // Static background color
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
+            {/* Conditional links based on authentication */}
+            {isLoggedIn ? (
+              <>
+                <Link to="/my-bookings" className="navbar-link">
+                  My Bookings
+                </Link>
+              </>
+            ) : null}
           </div>
-          {isDropdownOpen && (
-            <div className="profile-dropdown">
-              <Link to="/profile" className="dropdown-item">
-                Profile
-              </Link>
-              <button onClick={handleLogout} className="dropdown-item">
-                Logout
-              </button>
-            </div>
-          )}
+
+          <div className="navbar-auth">
+            {isLoggedIn ? (
+              <>
+                <Link to="/profile" className="navbar-profile">
+                  <span className="profile-icon">👤</span>
+                  <span className="profile-text">Profile</span>
+                </Link>
+                <button onClick={handleLogout} className="navbar-button logout-button">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="navbar-button login-button">
+                  Login
+                </Link>
+                <Link to="/register" className="navbar-button register-button">
+                  Register
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </nav>

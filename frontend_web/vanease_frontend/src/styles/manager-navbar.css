@@ -1,0 +1,216 @@
+.manager-navbar {
+    background-color: #34572e;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .manager-navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
+  }
+  
+  .manager-navbar-logo-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .manager-navbar-logo {
+    color: white;
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo-text {
+    font-size: 1.75rem;
+    font-weight: bold;
+  }
+  
+  .manager-badge {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    margin-left: 1rem;
+  }
+  
+  .manager-navbar-toggle {
+    display: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+  }
+  
+  .manager-navbar-menu {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-grow: 1;
+    margin-left: 2rem;
+  }
+  
+  .manager-navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .manager-navbar-link {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+    padding: 0.5rem 0;
+    position: relative;
+  }
+  
+  .manager-navbar-link:hover {
+    color: white;
+  }
+  
+  .manager-navbar-link::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #8ed284;
+    transition: width 0.3s;
+  }
+  
+  .manager-navbar-link:hover::after {
+    width: 100%;
+  }
+  
+  .manager-navbar-auth {
+    display: flex;
+    align-items: center;
+  }
+  
+  .manager-profile-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .manager-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .manager-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #8ed284;
+    color: #34572e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.25rem;
+  }
+  
+  .manager-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .manager-name {
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+  
+  .manager-email {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.75rem;
+  }
+  
+  .manager-logout-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .manager-logout-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  @media screen and (max-width: 960px) {
+    .manager-navbar-toggle {
+      display: block;
+    }
+  
+    .manager-navbar-menu {
+      position: fixed;
+      top: 80px;
+      left: -100%;
+      width: 100%;
+      height: calc(100vh - 80px);
+      flex-direction: column;
+      background-color: #34572e;
+      padding: 2rem;
+      transition: left 0.3s ease;
+      margin-left: 0;
+      overflow-y: auto;
+    }
+  
+    .manager-navbar-menu.active {
+      left: 0;
+    }
+  
+    .manager-navbar-links {
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+  
+    .manager-navbar-link {
+      width: 100%;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  
+    .manager-profile-section {
+      flex-direction: column;
+      width: 100%;
+      gap: 1.5rem;
+    }
+  
+    .manager-profile {
+      width: 100%;
+    }
+  
+    .manager-logout-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
