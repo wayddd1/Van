@@ -10,8 +10,9 @@ export default function Register() {
     email: "",
     phone: "",
     password: "",
-    confirmPassword: "",
   })
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
   const navigate = useNavigate()
 
   const handleChange = (e) => {
@@ -22,11 +23,51 @@ export default function Register() {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError("")
+    setSuccess("")
 
-    // Simply redirect to home page without registration logic
-    navigate("/")
+    // Client-side validation
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long")
+      return
+    }
+
+    try {
+      console.log("Request payload:", formData) // Debugging log
+
+      const response = await fetch("http://localhost:8080/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      console.log("Response status:", response.status)
+      console.log("Response headers:", response.headers)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Error response:", errorText)
+        setError(errorText || "Registration failed")
+        return
+      }
+
+      const data = await response.text()
+      console.log("Registration successful:", data)
+      setSuccess("Registration successful! You can now log in.")
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+      })
+    } catch (err) {
+      console.error("Network error:", err)
+      setError("An error occurred. Please try again.")
+    }
   }
 
   return (
@@ -133,7 +174,7 @@ export default function Register() {
                 strokeLinejoin="round"
                 className="input-icon"
               >
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
               </svg>
               <input
                 type="tel"
@@ -179,37 +220,6 @@ export default function Register() {
             </div>
           </div>
 
-          <div className="auth-form-group">
-            <label htmlFor="confirmPassword" className="auth-form-label">
-              Confirm Password
-            </label>
-            <div className="input-with-icon">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="input-icon"
-              >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="auth-form-control"
-                placeholder="••••••••"
-                required
-              />
-            </div>
-          </div>
-
           <div className="auth-form-options">
             <label className="auth-checkbox-label">
               <input type="checkbox" className="auth-checkbox" required />
@@ -226,6 +236,8 @@ export default function Register() {
             </label>
           </div>
 
+          {error && <p className="error-message">{error}</p>}
+          {success && <p className="success-message">{success}</p>}
           <button type="submit" className="auth-submit-btn">
             Create Account
           </button>

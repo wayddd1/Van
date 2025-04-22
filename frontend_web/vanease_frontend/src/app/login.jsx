@@ -9,6 +9,7 @@ export default function Login() {
     email: "",
     password: "",
   })
+  const [error, setError] = useState("")
   const navigate = useNavigate()
 
   const handleChange = (e) => {
@@ -19,11 +20,39 @@ export default function Login() {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError("")
 
-    // Simply redirect to home page without authentication
-    navigate("/")
+    try {
+      console.log("Request payload:", formData) // Debugging log
+
+      const response = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      console.log("Response status:", response.status)
+      console.log("Response headers:", response.headers)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Error response:", errorText)
+        setError(errorText || "Login failed")
+        return
+      }
+
+      const data = await response.json() // Parse JSON response
+      console.log("Login successful:", data)
+      localStorage.setItem("token", data.token) // Store the token
+      navigate("/")
+    } catch (err) {
+      console.error("Network error:", err)
+      setError("An error occurred. Please try again.")
+    }
   }
 
   const handleGoogleSignIn = () => {
@@ -128,6 +157,8 @@ export default function Login() {
               Forgot password?
             </a>
           </div>
+
+          {error && <p className="error-message">{error}</p>}
 
           <button type="submit" className="auth-submit-btn">
             Sign In
