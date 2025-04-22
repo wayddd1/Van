@@ -34,6 +34,15 @@ public class JwtService {
                 .getSubject();
     }
 
+    public Integer extractUserId(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("userId", Integer.class); // Ensure the token contains a "userId" claim
+    }
+
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);

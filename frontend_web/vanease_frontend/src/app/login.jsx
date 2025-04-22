@@ -25,8 +25,6 @@ export default function Login() {
     setError("")
 
     try {
-      console.log("Request payload:", formData) // Debugging log
-
       const response = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: {
@@ -35,22 +33,16 @@ export default function Login() {
         body: JSON.stringify(formData),
       })
 
-      console.log("Response status:", response.status)
-      console.log("Response headers:", response.headers)
-
       if (!response.ok) {
         const errorText = await response.text()
-        console.error("Error response:", errorText)
         setError(errorText || "Login failed")
         return
       }
 
-      const data = await response.json() // Parse JSON response
-      console.log("Login successful:", data)
+      const data = await response.json()
       localStorage.setItem("token", data.token) // Store the token
-      navigate("/")
+      navigate("/") // Redirect to home page
     } catch (err) {
-      console.error("Network error:", err)
       setError("An error occurred. Please try again.")
     }
   }

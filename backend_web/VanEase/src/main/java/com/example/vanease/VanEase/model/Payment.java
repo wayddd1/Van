@@ -13,7 +13,7 @@ import java.time.LocalDate;
 public class Payment {
 
     public enum PaymentMethod {
-        CREDIT_CARD, DEBIT_CARD, BANK_TRANSFER, PAYPAL
+        CREDIT_CARD, DEBIT_CARD, BANK_TRANSFER, PAYPAL, CASH_ON_SITE
     }
 
     public enum PaymentStatus {

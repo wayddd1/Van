@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import "../styles/book-van.css"
 
 export default function BookVan() {
@@ -9,12 +9,30 @@ export default function BookVan() {
     dropoffLocation: "",
     pickupDate: "",
     dropoffDate: "",
-    vanType: "",
-    name: "",
-    email: "",
-    phone: "",
+    vanModel: "",
     paymentMethod: "",
   })
+  const [vanModels, setVanModels] = useState([])
+  const [selectedVehicleId, setSelectedVehicleId] = useState(null)
+  const [errorMessage, setErrorMessage] = useState("")
+
+  useEffect(() => {
+    const fetchVanModels = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/api/vehicles")
+        if (!response.ok) {
+          throw new Error("Failed to fetch van models")
+        }
+        const data = await response.json()
+        setVanModels(data) // Store the entire vehicle data
+      } catch (error) {
+        console.error("Error fetching van models:", error)
+        setErrorMessage("Failed to load van models. Please try again later.")
+      }
+    }
+
+    fetchVanModels()
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -22,13 +40,68 @@ export default function BookVan() {
       ...prev,
       [name]: value,
     }))
+
+    if (name === "vanModel") {
+      const selectedVehicle = vanModels.find((vehicle) => vehicle.model === value)
+      setSelectedVehicleId(selectedVehicle ? selectedVehicle.vehicleId : null)
+    }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // In a real application, you would send this data to your backend
-    console.log("Booking form submitted:", formData)
-    alert("Booking request submitted! We will contact you shortly.")
+    setErrorMessage("")
+
+    if (!selectedVehicleId) {
+      setErrorMessage("Please select a van model.")
+      return
+    }
+
+    const bookingData = {
+      startDate: formData.pickupDate,
+      endDate: formData.dropoffDate,
+      pickupLocation: formData.pickupLocation,
+      dropoffLocation: formData.dropoffLocation,
+      vehicle: { vehicleId: selectedVehicleId },
+      paymentStatus: "PENDING",
+    }
+
+    try {
+      const token = localStorage.getItem("token")
+      if (!token) {
+        setErrorMessage("You must be logged in to make a booking.")
+        return
+      }
+
+      const response = await fetch("http://localhost:8080/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(bookingData),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Error response:", errorText)
+        setErrorMessage("Failed to submit booking. Please try again.")
+        return
+      }
+
+      alert("Booking request submitted successfully!")
+      setFormData({
+        pickupLocation: "",
+        dropoffLocation: "",
+        pickupDate: "",
+        dropoffDate: "",
+        vanModel: "",
+        paymentMethod: "",
+      })
+      setSelectedVehicleId(null)
+    } catch (error) {
+      console.error("Error submitting booking:", error)
+      setErrorMessage("An unexpected error occurred. Please try again.")
+    }
   }
 
   return (
@@ -36,8 +109,10 @@ export default function BookVan() {
       <div className="booking-container">
         <h1 className="booking-title">Book Your Van</h1>
         <p className="booking-subtitle">
-          Fill out the form below to reserve your van. We'll get back to you promptly to confirm your booking
+          Fill out the form below to reserve your van. We'll get back to you promptly to confirm your booking.
         </p>
+
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
 
         <div className="booking-card">
           <div className="booking-layout">
@@ -105,39 +180,31 @@ export default function BookVan() {
                       <label htmlFor="pickupLocation" className="booking-form-label">
                         Pickup Location
                       </label>
-                      <select
+                      <input
+                        type="text"
                         id="pickupLocation"
                         name="pickupLocation"
                         value={formData.pickupLocation}
                         onChange={handleChange}
                         className="booking-form-control"
+                        placeholder="Enter pickup location"
                         required
-                      >
-                        <option value="">Select location</option>
-                        <option value="downtown">Downtown</option>
-                        <option value="airport">Airport</option>
-                        <option value="north">North Branch</option>
-                        <option value="south">South Branch</option>
-                      </select>
+                      />
                     </div>
                     <div className="booking-form-group">
                       <label htmlFor="dropoffLocation" className="booking-form-label">
                         Drop-off Location
                       </label>
-                      <select
+                      <input
+                        type="text"
                         id="dropoffLocation"
                         name="dropoffLocation"
                         value={formData.dropoffLocation}
                         onChange={handleChange}
                         className="booking-form-control"
+                        placeholder="Enter drop-off location"
                         required
-                      >
-                        <option value="">Select location</option>
-                        <option value="downtown">Downtown</option>
-                        <option value="airport">Airport</option>
-                        <option value="north">North Branch</option>
-                        <option value="south">South Branch</option>
-                      </select>
+                      />
                     </div>
                   </div>
 
@@ -173,73 +240,24 @@ export default function BookVan() {
                   </div>
 
                   <div className="booking-form-group">
-                    <label htmlFor="vanType" className="booking-form-label">
-                      Van Type
+                    <label htmlFor="vanModel" className="booking-form-label">
+                      Van Model
                     </label>
                     <select
-                      id="vanType"
-                      name="vanType"
-                      value={formData.vanType}
+                      id="vanModel"
+                      name="vanModel"
+                      value={formData.vanModel}
                       onChange={handleChange}
                       className="booking-form-control"
                       required
                     >
-                      <option value="">Select van type</option>
-                      <option value="compact">Compact Van</option>
-                      <option value="family">Family Van</option>
-                      <option value="cargo">Cargo Van</option>
-                      <option value="luxury">Luxury Van</option>
+                      <option value="">Select van model</option>
+                      {vanModels.map((vehicle) => (
+                        <option key={vehicle.vehicleId} value={vehicle.model}>
+                          {vehicle.model}
+                        </option>
+                      ))}
                     </select>
-                  </div>
-                </div>
-
-                <div className="booking-form-section">
-                  <h3 className="booking-form-section-title">Personal Information</h3>
-
-                  <div className="booking-form-grid">
-                    <div className="booking-form-group">
-                      <label htmlFor="name" className="booking-form-label">
-                        Full Name
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="booking-form-control"
-                        required
-                      />
-                    </div>
-                    <div className="booking-form-group">
-                      <label htmlFor="email" className="booking-form-label">
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="booking-form-control"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="booking-form-group">
-                    <label htmlFor="phone" className="booking-form-label">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="booking-form-control"
-                      required
-                    />
                   </div>
                 </div>
 

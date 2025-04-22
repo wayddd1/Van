@@ -2,7 +2,13 @@ package com.example.vanease.VanEase.controller;
 
 import com.example.vanease.VanEase.model.Booking;
 import com.example.vanease.VanEase.model.BookingStatus;
+import com.example.vanease.VanEase.model.User;
+import com.example.vanease.VanEase.model.Vehicle;
 import com.example.vanease.VanEase.service.BookingService;
+import com.example.vanease.VanEase.security.service.JwtService;
+import com.example.vanease.VanEase.repository.UserRepository;
+import com.example.vanease.VanEase.repository.VehicleRepository;
+import com.example.vanease.VanEase.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -23,10 +30,16 @@ import java.util.List;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
+    private final VehicleRepository vehicleRepository;
 
     @Autowired
-    public BookingController(BookingService bookingService) {
+    public BookingController(BookingService bookingService, JwtService jwtService, UserRepository userRepository, VehicleRepository vehicleRepository) {
         this.bookingService = bookingService;
+        this.jwtService = jwtService;
+        this.userRepository = userRepository;
+        this.vehicleRepository = vehicleRepository;
     }
 
     @Operation(summary = "Get all bookings", description = "Retrieves a list of all bookings")
@@ -64,13 +77,34 @@ public class BookingController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Booking created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
-            @ApiResponse(responseCode = "404", description = "Vehicle or user not found")
+            @ApiResponse(responseCode = "404", description = "Vehicle or user not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access")
     })
     @PostMapping
     public ResponseEntity<Booking> createBooking(
-            @Parameter(description = "Booking details to create")
-            @Valid @RequestBody Booking booking) {
-        return ResponseEntity.ok(bookingService.createBooking(booking));
+            @Valid @RequestBody Booking booking,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body(null); // Unauthorized if no valid token is provided
+        }
+
+        try {
+            String token = authorizationHeader.replace("Bearer ", "");
+            Integer userId = jwtService.extractUserId(token);
+
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+            booking.setUser(user);
+
+            Vehicle vehicle = vehicleRepository.findById(booking.getVehicle().getVehicleId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + booking.getVehicle().getVehicleId()));
+            booking.setVehicle(vehicle);
+
+            Booking createdBooking = bookingService.createBooking(booking);
+            return ResponseEntity.ok(createdBooking);
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(null); // Bad request for validation issues
+        }
     }
 
     @Operation(summary = "Update booking status", description = "Updates the status of a booking")
