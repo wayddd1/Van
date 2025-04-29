@@ -1,60 +1,130 @@
 package com.example.vanease.VanEase.security.service;
 
-import io.jsonwebtoken.*;
+import com.example.vanease.VanEase.model.User;
+import com.example.vanease.VanEase.repository.UserRepository;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "your-256-bit-secret-key-for-jwt-generation"; // Replace with a secure key
-    private static final long EXPIRATION_TIME = 86400000; // 1 day in milliseconds
+    private final UserRepository userRepository;
 
-    private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    public String generateToken(String username) {
-        return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
+
+    @Value("${jwt.refresh-expiration}")
+    private long refreshExpiration;
+
+    public JwtService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public String extractUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        return extractClaim(token, Claims::getSubject);
     }
 
-    public Integer extractUserId(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.get("userId", Integer.class); // Ensure the token contains a "userId" claim
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
+    public String generateToken(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return generateToken(user);
+    }
+
+    public String generateToken(User user) {
+        return generateToken((UserDetails) user);
+    }
+
+    public String generateToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        if (userDetails instanceof User user) {
+            claims.put("role", user.getRole().name());
+        }
+        return buildToken(claims, userDetails, jwtExpiration);
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        return buildToken(claims, userDetails, refreshExpiration);
+    }
+
+    public String refreshToken(String token) {
+        if (validateToken(token)) {
+            String email = extractUsername(token);
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            return generateToken(user);
+        } else {
+            throw new IllegalArgumentException("Invalid or expired token");
+        }
+    }
+
+    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            String email = extractUsername(token);
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            return isTokenValid(token, (UserDetails) user);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private boolean isTokenExpired(String token) {
-        Date expiration = Jwts.parserBuilder()
-                .setSigningKey(key)
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts
+                .parserBuilder()
+                .setSigningKey(getSignInKey())
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-        return expiration.before(new Date());
+                .getBody();
+    }
+
+    private Key getSignInKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }

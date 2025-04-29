@@ -1,28 +1,31 @@
-"use client"
+// src/components/Navbar.jsx
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // Import useAuth from AuthContext
+import "../styles/navbar.css";
 
-import { useState, useEffect } from "react"
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import "../styles/navbar.css"
-
-export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(true) // Always show as logged in for demo
-  const location = useLocation()
-  const navigate = useNavigate()
+export default function Navbar({ role }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, token, logout } = useAuth(); // Get user info, token, and logout function from context
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Close mobile menu when route changes
-    setIsMenuOpen(false)
-  }, [location.pathname])
+    setIsMenuOpen(false);
+  }, [location.pathname]);
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   const handleLogout = () => {
-    // Simply redirect to home page
-    navigate("/")
-  }
+    logout(); // Call the logout function from context
+    navigate("/"); // Redirect to the homepage or login page
+  };
+
+  // Check if user is authenticated
+  const isAuthenticated = !!token;
 
   return (
     <nav className="navbar">
@@ -37,28 +40,29 @@ export default function Navbar() {
 
         <div className={`navbar-menu ${isMenuOpen ? "active" : ""}`}>
           <div className="navbar-links">
-            <Link to="/" className="navbar-link">
-              Home
-            </Link>
-            <Link to="/van-list" className="navbar-link">
-              Our Vans
-            </Link>
-            <Link to="/book-van" className="navbar-link">
-              Book a Van
-            </Link>
+            <Link to="/" className="navbar-link">Home</Link>
+            <Link to="/our-vans" className="navbar-link">Our Vans</Link>
+            <Link to="/book-van" className="navbar-link">Book a Van</Link>
 
-            {/* Conditional links based on authentication */}
-            {isLoggedIn ? (
+            {/* Conditional links based on role */}
+            {role === 'MANAGER' && (
               <>
-                <Link to="/my-bookings" className="navbar-link">
-                  My Bookings
-                </Link>
+                <Link to="/manager-dashboard" className="navbar-link">Manager Dashboard</Link>
+                <Link to="/manager-vans" className="navbar-link">Manage Vans</Link>
               </>
-            ) : null}
+            )}
+            {role === 'CUSTOMER' && (
+              <Link to="/customer-dashboard" className="navbar-link">Customer Dashboard</Link>
+            )}
+
+            {/* My Bookings link only visible if logged in */}
+            {isAuthenticated && (
+              <Link to="/my-bookings" className="navbar-link">My Bookings</Link>
+            )}
           </div>
 
           <div className="navbar-auth">
-            {isLoggedIn ? (
+            {isAuthenticated ? (
               <>
                 <Link to="/profile" className="navbar-profile">
                   <span className="profile-icon">👤</span>
@@ -70,17 +74,13 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link to="/login" className="navbar-button login-button">
-                  Login
-                </Link>
-                <Link to="/register" className="navbar-button register-button">
-                  Register
-                </Link>
+                <Link to="/login" className="navbar-button login-button">Login</Link>
+                <Link to="/register" className="navbar-button register-button">Register</Link>
               </>
             )}
           </div>
         </div>
       </div>
     </nav>
-  )
+  );
 }

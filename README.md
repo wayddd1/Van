@@ -22,6 +22,16 @@
 - I currently live in Punta Labangon.
 - I like listening to music and playing video games
 
+## Member 2
+### NAME: LLOYD SCOTT A. CABIDO
+### COURSE AND YEAR: BSIT-4
+
+- My name is Lloyd Scott A. Cabido. 
+- I am 22 years old. 
+- I was born on June 19, 2002. 
+- I currently live in Camparville Buhisan.
+- I like read and watch.
+
 
 
 

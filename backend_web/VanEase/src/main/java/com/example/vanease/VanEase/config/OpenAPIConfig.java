@@ -16,7 +16,7 @@ public class OpenAPIConfig {
     @Bean
     public OpenAPI vanEaseOpenAPI() {
         Server devServer = new Server();
-        devServer.setUrl("http://localhost:8080");
+        devServer.setUrl("http://localhost:8080/api");
         devServer.setDescription("Development Server");
 
         Server prodServer = new Server();

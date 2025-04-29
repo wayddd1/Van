@@ -1,34 +1,68 @@
 package com.example.vanease.VanEase.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
+import java.util.Collections;
+
+@Getter
+@Setter
 @Entity
-@Data
-@Table(name = "users")
-public class User {
-
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")  // Fixed column name
-    private Integer userId;
+    private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
-
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "phone")
-    private String phone;
+    @Column(nullable = false)
+    private String name;
 
-    @Column(name = "password", nullable = false)
+    @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Role role = Role.CUSTOMER;  // Default value
+    @Column(nullable = false)
+    private String phone;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Booking> bookings;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+    @Column(nullable = false)
+    private boolean enabled;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.emptyList(); // Customize if roles/authorities are needed
+    }
+
+    @Override
+    public String getUsername() {
+        return email; // Use email as the username
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // Customize as needed
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // Customize as needed
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // Customize as needed
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
 }

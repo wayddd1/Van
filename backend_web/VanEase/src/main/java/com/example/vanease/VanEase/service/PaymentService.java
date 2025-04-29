@@ -1,100 +1,65 @@
 package com.example.vanease.VanEase.service;
 
-import com.example.vanease.VanEase.exception.*;
-import com.example.vanease.VanEase.model.*;
-import com.example.vanease.VanEase.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.vanease.VanEase.dto.PaymentRequestDTO;
+import com.example.vanease.VanEase.exception.ResourceNotFoundException;
+import com.example.vanease.VanEase.model.Booking;
+import com.example.vanease.VanEase.model.Payment;
+import com.example.vanease.VanEase.model.PaymentStatus;
+import com.example.vanease.VanEase.repository.BookingRepository;
+import com.example.vanease.VanEase.repository.PaymentRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final BookingRepository bookingRepository;
 
-    @Autowired
-    public PaymentService(PaymentRepository paymentRepository,
-                          BookingRepository bookingRepository) {
-        this.paymentRepository = paymentRepository;
-        this.bookingRepository = bookingRepository;
-    }
-
-    public List<Payment> getAllPayments() {
-        return paymentRepository.findAll();
-    }
-
-    public Payment getPaymentById(Integer id) {
-        return paymentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + id));
-    }
-
-    public Payment getPaymentByBookingId(Integer bookingId) {
-        return paymentRepository.findByBooking_BookingId(bookingId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Payment not found for booking id: " + bookingId));
-    }
-
     @Transactional
-    public Payment processPayment(Payment payment) {
-        // Validate booking exists
-        Booking booking = bookingRepository.findById(payment.getBooking().getBookingId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Booking not found with id: " + payment.getBooking().getBookingId()));
+    public Payment createPayment(PaymentRequestDTO paymentRequest) {
+        Booking booking = bookingRepository.findById(paymentRequest.getBookingId())
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + paymentRequest.getBookingId()));
 
-        // Validate payment amount
-        if (payment.getAmount() == null || payment.getAmount() <= 0) {
-            throw new InvalidPaymentException("Payment amount must be positive");
-        }
-
-        // Check for existing payment
-        if (paymentRepository.existsByBooking_BookingId(booking.getBookingId())) {
-            throw new PaymentExistsException(
-                    "Payment already exists for booking id: " + booking.getBookingId());
-        }
-
-        // Validate booking status
-        if (!booking.isActive()) {
-            throw new InvalidBookingStateException(
-                    "Cannot process payment for inactive booking");
-        }
-
-        // Process payment
+        Payment payment = new Payment();
         payment.setBooking(booking);
-        if (payment.processPayment()) {
-            booking.confirm();
-            bookingRepository.save(booking);
-            return paymentRepository.save(payment);
-        } else {
-            throw new PaymentProcessingException("Payment processing failed");
-        }
-    }
-
-    @Transactional
-    public Payment refundPayment(Integer paymentId) {
-        Payment payment = getPaymentById(paymentId);
-
-        if (payment.getPaymentStatus() != Payment.PaymentStatus.COMPLETED) {
-            throw new InvalidPaymentStateException(
-                    "Only completed payments can be refunded");
-        }
-
-        // Simulate refund processing
-        payment.setPaymentStatus(Payment.PaymentStatus.REFUNDED);
-        payment.getBooking().cancel();
-        bookingRepository.save(payment.getBooking());
+        payment.setAmount(BigDecimal.valueOf(paymentRequest.getAmount()));
+        payment.setPaymentMethod(paymentRequest.getPaymentMethod());
 
         return paymentRepository.save(payment);
     }
 
+    @Transactional(readOnly = true)
+    public List<Payment> getPaymentsByBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
+
+        return paymentRepository.findByBooking(booking);
+    }
+
     @Transactional
-    public void deletePayment(Integer id) {
-        Payment payment = getPaymentById(id);
-        payment.getBooking().cancel();
-        bookingRepository.save(payment.getBooking());
-        paymentRepository.delete(payment);
+    public void deletePayment(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + paymentId));
+        paymentRepository.deleteById(paymentId);
+    }
+
+    @Transactional(readOnly = true)
+    public Payment getPaymentById(Long paymentId) {
+        return paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + paymentId));
+    }
+
+    @Transactional
+    public Payment updatePaymentStatus(Long paymentId, String status) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + paymentId));
+        payment.setPaymentStatus(PaymentStatus.valueOf(status));
+        return paymentRepository.save(payment);
     }
 }

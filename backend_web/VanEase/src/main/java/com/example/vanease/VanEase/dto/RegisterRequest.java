@@ -1,23 +1,25 @@
 package com.example.vanease.VanEase.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Email;
 import lombok.Data;
 
 @Data
 public class RegisterRequest {
-    @NotBlank
-    @Size(max = 100)
+    @NotBlank(message = "Name is required")
     private String name;
 
-    @NotBlank
-    @Email
-    @Size(max = 100)
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
     private String email;
 
-    @Size(max = 15)
+    @NotBlank(message = "Phone is required")
+    @Pattern(regexp = "^[0-9]{10,15}$", message = "Invalid phone number")
     private String phone;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters long")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 }

@@ -1,7 +1,188 @@
+/* Manager Vans Page Styles */
 .manager-vans-container {
+  padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+}
+
+.vans-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.vans-title {
+  color: #34572e;
+  font-weight: 600;
+}
+
+.vans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.van-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.van-card:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.van-image-container {
+  height: 180px;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+.van-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.van-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #e8f0e8;
+  color: #34572e;
+  font-weight: 500;
+}
+
+.van-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.van-title {
+  color: #34572e;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.van-details {
+  flex: 1;
+  margin-bottom: 1rem;
+}
+
+.van-details p {
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+}
+
+.van-description {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.van-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+/* Status styling */
+.status-available {
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.status-maintenance {
+  color: #f57c00;
+  font-weight: 500;
+}
+
+.status-reserved {
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.status-rented {
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+/* Form styling */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.description-field {
+  grid-column: span 2;
+}
+
+.availability-container {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.availability-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.availability-label input {
+  margin-right: 0.5rem;
+}
+
+/* Error and loading states */
+.error-message {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.dialog-error {
+  margin-top: 1rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.no-vans {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .vans-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .description-field {
+    grid-column: span 1;
+  }
 }
 
 .manager-vans-header {
@@ -343,4 +524,88 @@
   .form-row {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* File upload styling */
+.file-upload-container {
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.image-preview {
+  margin-top: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.5rem;
+  background-color: #f9f9f9;
+  max-width: 100%;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Form grid layout */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.description-field {
+  grid-column: span 2;
+}
+
+/* Status indicators */
+.status-available {
+  color: #34972e;
+  font-weight: 600;
+}
+
+.status-maintenance {
+  color: #f57c00;
+  font-weight: 600;
+}
+
+.status-reserved, .status-rented {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+/* Error message styling */
+.error-message {
+  color: #d32f2f;
+  background-color: #fdecea;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.dialog-error {
+  margin-top: 0.5rem;
+}
+
+/* Loading indicator */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Empty state */
+.no-vans {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin: 2rem 0;
 }

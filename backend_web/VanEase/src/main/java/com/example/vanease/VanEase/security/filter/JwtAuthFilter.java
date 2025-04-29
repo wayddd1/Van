@@ -1,12 +1,12 @@
 package com.example.vanease.VanEase.security.filter;
 
 import com.example.vanease.VanEase.security.service.CustomUserDetailsService;
-import com.example.vanease.VanEase.security.service.JwtService;
+import com.example.vanease.VanEase.security.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,63 +15,50 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private static final List<String> SWAGGER_PATHS = Arrays.asList(
-            "/swagger-ui",
-            "/v3/api-docs",
-            "/api-docs",
-            "/swagger-ui.html"
-    );
-
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private final JwtUtil jwtUtil;
+    private final CustomUserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Skip JWT check for Swagger and public endpoints
-        String path = request.getRequestURI();
-        if (isSwaggerPath(path)) {  // Fixed: Added missing closing parenthesis
+        final String authHeader = request.getHeader("Authorization");
+        final String jwt;
+        final String userEmail;
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String authHeader = request.getHeader("Authorization");
-        String token = null;
-        String username = null;
+        jwt = authHeader.substring(7);
+        userEmail = jwtUtil.extractUsername(jwt);
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-            username = jwtService.extractUsername(token);
-        }
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (jwtUtil.isTokenValid(jwt, userDetails)) {
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
 
-            if (jwtService.validateToken(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-            } else {
-                System.out.println("Invalid JWT token"); // Debugging log
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                return;
             }
         }
-        filterChain.doFilter(request, response);
-    }
 
-    private boolean isSwaggerPath(String path) {
-        return SWAGGER_PATHS.stream().anyMatch(path::contains);
+        filterChain.doFilter(request, response);
     }
 }
