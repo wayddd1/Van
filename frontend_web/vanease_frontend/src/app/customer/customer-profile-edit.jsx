@@ -1,6 +1,6 @@
 // src/components/customer-profile-edit.jsx
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 
 const CustomerProfileEdit = () => {

@@ -12,31 +12,38 @@ import java.time.temporal.ChronoUnit;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "bookings")
 public class Booking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_id")
-    private Integer bookingId;
+    private Long bookingId;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
 
+    @NotNull
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
+    @NotNull
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    @NotBlank
     @Column(name = "pickup_location", nullable = false)
     private String pickupLocation;
 
+    @NotBlank
     @Column(name = "dropoff_location", nullable = false)
     private String dropoffLocation;
 

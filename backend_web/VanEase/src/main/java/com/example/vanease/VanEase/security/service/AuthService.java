@@ -11,9 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import jakarta.servlet.http.HttpServletRequest; // Fixed import
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +27,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final LogoutService logoutService; // Added LogoutService
 
     public ResponseEntity<?> registerUser(RegisterRequest request, Role role) {
         try {
@@ -97,6 +100,17 @@ public class AuthService {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Invalid or expired token"));
+        }
+    }
+
+    // Added logoutUser method
+    public ResponseEntity<?> logoutUser(HttpServletRequest request, Authentication authentication) {
+        try {
+            logoutService.logout(request, authentication);
+            return ResponseEntity.ok(Map.of("message", "Logout successful"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Logout failed"));
         }
     }
 }

@@ -1,10 +1,9 @@
-// src/components/Navbar.jsx
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; // Import useAuth from AuthContext
 import "../styles/navbar.css";
 
-export default function Navbar({ role }) {
+export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, token, logout } = useAuth(); // Get user info, token, and logout function from context
   const location = useLocation();
@@ -45,13 +44,13 @@ export default function Navbar({ role }) {
             <Link to="/book-van" className="navbar-link">Book a Van</Link>
 
             {/* Conditional links based on role */}
-            {role === 'MANAGER' && (
+            {user?.role === 'MANAGER' && (
               <>
                 <Link to="/manager-dashboard" className="navbar-link">Manager Dashboard</Link>
                 <Link to="/manager-vans" className="navbar-link">Manage Vans</Link>
               </>
             )}
-            {role === 'CUSTOMER' && (
+            {user?.role === 'CUSTOMER' && (
               <Link to="/customer-dashboard" className="navbar-link">Customer Dashboard</Link>
             )}
 

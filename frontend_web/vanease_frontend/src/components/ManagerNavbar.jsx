@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext"; // Use the AuthContext
 import "../styles/manager-navbar.css"
 
 export default function ManagerNavbar() {
@@ -21,7 +21,7 @@ export default function ManagerNavbar() {
 
   const handleLogout = () => {
     logout()  // Use the logout function from AuthContext
-    navigate("/login")
+    navigate("/login")  // Redirect to login page after logging out
   }
 
   return (

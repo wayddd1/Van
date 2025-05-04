@@ -12,6 +12,8 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 
+const API_BASE_URL = 'http://localhost:8080'; // You can move this to .env if needed
+
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -29,15 +31,13 @@ const Register = () => {
       ...prev,
       [name]: value
     }));
-    // Clear error when user types
     if (error) setError(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    
-    // Client-side validation
+
     if (!formData.name || !formData.email || !formData.phone || !formData.password) {
       setError('Please fill in all fields');
       return;
@@ -46,15 +46,12 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8080/auth/register', 
-        formData, 
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          withCredentials: true
-        }
-      );
+      const response = await axios.post(`${API_BASE_URL}/auth/register`, formData, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: false // change to `true` if backend uses cookies
+      });
 
       if (response.status >= 200 && response.status < 300) {
         navigate('/login');
@@ -64,7 +61,7 @@ const Register = () => {
     } catch (err) {
       const serverError = err.response?.data;
       let errorMessage = 'Registration failed. Please try again.';
-      
+
       if (serverError?.error) {
         errorMessage = serverError.error;
       } else if (serverError?.message) {
@@ -72,7 +69,7 @@ const Register = () => {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
       console.error('Registration error:', err);
     } finally {
@@ -104,10 +101,7 @@ const Register = () => {
       <Box 
         component="form" 
         onSubmit={handleSubmit} 
-        sx={{ 
-          width: '100%',
-          '& .MuiTextField-root': { mb: 2 } 
-        }}
+        sx={{ width: '100%', '& .MuiTextField-root': { mb: 2 } }}
       >
         <TextField
           fullWidth
@@ -116,9 +110,6 @@ const Register = () => {
           value={formData.name}
           onChange={handleChange}
           required
-          autoComplete="name"
-          error={Boolean(error && error.toLowerCase().includes('name'))}
-          helperText={error?.toLowerCase().includes('name') ? error : ''}
         />
         
         <TextField
@@ -129,9 +120,6 @@ const Register = () => {
           value={formData.email}
           onChange={handleChange}
           required
-          autoComplete="email"
-          error={Boolean(error && error.toLowerCase().includes('email'))}
-          helperText={error?.toLowerCase().includes('email') ? error : ''}
         />
         
         <TextField
@@ -142,8 +130,6 @@ const Register = () => {
           value={formData.phone}
           onChange={handleChange}
           required
-          error={Boolean(error && error.toLowerCase().includes('phone'))}
-          helperText={error?.toLowerCase().includes('phone') ? error : ''}
         />
         
         <TextField
@@ -154,9 +140,6 @@ const Register = () => {
           value={formData.password}
           onChange={handleChange}
           required
-          autoComplete="new-password"
-          error={Boolean(error && error.toLowerCase().includes('password'))}
-          helperText={error?.toLowerCase().includes('password') ? error : ''}
         />
         
         {error && (
@@ -171,22 +154,14 @@ const Register = () => {
           variant="contained"
           size="large"
           disabled={loading}
-          sx={{ 
-            py: 1.5,
-            mt: 1,
-            fontWeight: 'bold'
-          }}
+          sx={{ py: 1.5, mt: 1, fontWeight: 'bold' }}
         >
           {loading ? <CircularProgress size={24} color="inherit" /> : 'Register'}
         </Button>
         
         <Typography variant="body2" align="center" sx={{ mt: 3 }}>
           Already have an account?{' '}
-          <Link 
-            component={RouterLink} 
-            to="/login"
-            sx={{ fontWeight: 'bold' }}
-          >
+          <Link component={RouterLink} to="/login" sx={{ fontWeight: 'bold' }}>
             Sign in
           </Link>
         </Typography>

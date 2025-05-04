@@ -12,9 +12,10 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 
+
 const ManagerRegister = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    name: '',       
     email: '',
     phone: '',
     password: ''

@@ -35,15 +35,25 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('refreshToken');
-    setToken(null);
-    setUser(null);
-    setRole(null);
-  };
+  const logout = async () => {
+    try {
+      await axiosInstance.post('/auth/logout', null, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    } catch (error) {
+      console.error('Logout request failed:', error.response?.data || error.message);
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('refreshToken');
+      setToken(null);
+      setUser(null);
+      setRole(null);
+    }
+  };  
 
   const fetchUserProfile = async () => {
     if (!token) return;

@@ -1,43 +1,25 @@
 package com.example.vanease.VanEase.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import com.example.vanease.VanEase.model.VehicleFuelType;
+import com.example.vanease.VanEase.model.VehicleTransmissionType;
+import com.example.vanease.VanEase.model.VehicleStatus;
+import lombok.Builder;  // Add this import
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
+@Builder  // Add this annotation
 public class VehicleRequestDTO {
-    @NotBlank
     private String plateNumber;
-
-    @NotBlank
     private String brand;
-
-    @NotBlank
     private String model;
-
-    @NotNull
     private Integer year;
-
-    @NotNull
     private BigDecimal ratePerDay;
-
-    @NotNull
     private Integer capacity;
-
-    @NotBlank
-    private String fuelType;
-
-    @NotBlank
-    private String transmission;
-
-    private Boolean availability = true;
-
-    private String status;
-
+    private VehicleFuelType fuelType;
+    private VehicleTransmissionType transmission;
+    private Boolean availability;
+    private VehicleStatus status;
     private String description;
-
-    // Field to control image removal
-    private Boolean removeImage = false;
 }

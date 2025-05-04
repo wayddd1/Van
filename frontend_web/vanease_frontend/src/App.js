@@ -1,18 +1,28 @@
+// App.jsx
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-import Login from './app/login';
-import Register from './app/register';
-import ManagerRegister from './app/manager-register';
-import CustomerDashboard from './app/customer-dashboard';
-import ManagerDashboard from './app/manager-dashboard';
+// Auth Pages
+import Login from './app/auth/login';
+import Register from './app/auth/register';
+import ManagerRegister from './app/auth/manager-register';
+
+// Customer Pages
+import CustomerDashboard from './app/customer/customer-dashboard';
+
+// Manager Pages
+import ManagerDashboard from './app/manager/manager-dashboard';
+import ManagerVanAdd from './app/manager/vehicle/manager-van-add'; 
+import ManagerVanUpdate from './app/manager/vehicle/manager-van-update'; 
+import ManagerVanList from './app/manager/vehicle/manager-van-list';
+
+// Shared Components
 import ProtectedRoute from './components/ProtectedRoute';
 import UnauthorizedPage from './components/UnauthorizedPage';
 import Navbar from './components/Navbar';
 import ManagerNavbar from './components/ManagerNavbar';
-
 
 const theme = createTheme({
   palette: {
@@ -24,25 +34,31 @@ const theme = createTheme({
 const AppContent = () => {
   const { role } = useAuth();
   const location = useLocation();
-  const isManagerRoute = location.pathname.includes('/manager-');
+  const isManagerRoute = location.pathname.startsWith('/manager');
 
   return (
     <>
-      {!isManagerRoute && <Navbar role={role} />}
+      {isManagerRoute ? <ManagerNavbar role={role} /> : <Navbar role={role} />}
+
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/manager-register" element={<ManagerRegister />} />
-        <Route path="/manager-dashboard" element={<ManagerDashboard />} />
-        
-        
-        <Route path="/customer-dashboard" element={
-          <ProtectedRoute allowedRoles={['CUSTOMER']}>
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+        {/* Protected Customer Routes */}
+        <Route
+          path="/customer-dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['CUSTOMER']}>
               <CustomerDashboard />
             </ProtectedRoute>
           }
         />
+
+        {/* Protected Manager Routes */}
         <Route
           path="/manager-dashboard"
           element={
@@ -51,7 +67,30 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <Route
+          path="/manager/vans"
+          element={
+            <ProtectedRoute allowedRoles={['MANAGER']}>
+              <ManagerVanList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/manager/vans/add"
+          element={
+            <ProtectedRoute allowedRoles={['MANAGER']}>
+              <ManagerVanAdd />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/manager/vans/:id/update"
+          element={
+            <ProtectedRoute allowedRoles={['MANAGER']}>
+              <ManagerVanUpdate />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );
