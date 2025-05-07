@@ -3,13 +3,13 @@ package com.example.vanease.VanEase.dto;
 import com.example.vanease.VanEase.model.VehicleFuelType;
 import com.example.vanease.VanEase.model.VehicleTransmissionType;
 import com.example.vanease.VanEase.model.VehicleStatus;
-import lombok.Builder;  // Add this import
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
-@Builder  // Add this annotation
+@Builder
 public class VehicleRequestDTO {
     private String plateNumber;
     private String brand;

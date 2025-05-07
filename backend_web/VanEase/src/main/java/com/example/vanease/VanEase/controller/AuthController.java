@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletRequest; // Fixed import
 import java.util.Map;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping({"/auth", "/api/auth"})
 @Tag(name = "Authentication", description = "Endpoints for user authentication and registration")
 @RequiredArgsConstructor
 public class AuthController {
@@ -30,12 +30,15 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            return authService.authenticateUser(loginRequest);
+            log.info("Login attempt for user: {}", loginRequest.getEmail());
+            ResponseEntity<?> response = authService.authenticateUser(loginRequest);
+            log.info("Login successful for user: {}", loginRequest.getEmail());
+            return response;
         } catch (Exception e) {
             log.error("Login failed for user {}: {}", loginRequest.getEmail(), e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("Invalid credentials"));
+                    .body(new ErrorResponse("Invalid credentials: " + e.getMessage()));
         }
     }
 
@@ -71,7 +74,26 @@ public class AuthController {
 
     @Operation(summary = "Refresh token", description = "Endpoint to refresh the JWT token")
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String token) {
-        return authService.refreshToken(token);
+    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        log.info("Refresh token request received with header: {}", authHeader != null ? "present" : "missing");
+        
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String refreshToken = authHeader.substring(7);
+            try {
+                log.info("Attempting to refresh token");
+                ResponseEntity<?> response = authService.refreshToken(refreshToken);
+                log.info("Token refresh successful");
+                return response;
+            } catch (Exception e) {
+                log.error("Token refresh failed: {}", e.getMessage());
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(new ErrorResponse("Invalid refresh token: " + e.getMessage()));
+            }
+        }
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("No refresh token provided"));
     }
 }

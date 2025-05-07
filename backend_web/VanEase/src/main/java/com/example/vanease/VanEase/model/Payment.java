@@ -2,13 +2,16 @@ package com.example.vanease.VanEase.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Data;
-
+import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
 @Table(name = "payments")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Payment {
 
     @Id
@@ -26,11 +29,36 @@ public class Payment {
     @Column(nullable = false)
     private BigDecimal amount;
 
-    @NotBlank
-    @Column(nullable = false)
-    private String paymentMethod;
-
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private PaymentMethod paymentMethod;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+
+    // For PayPal/GCash transaction reference, nullable for cash
+    private String transactionId;
+
+    // For GCash proof of payment (e.g., image filename or URL)
+    private String proofUrl;
+
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

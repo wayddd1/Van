@@ -1,17 +1,14 @@
 package com.example.vanease.VanEase.dto;
 
-import jakarta.validation.constraints.NotNull;
+import com.example.vanease.VanEase.model.PaymentMethod;
 import lombok.Data;
+import java.math.BigDecimal;
 
 @Data
 public class PaymentRequestDTO {
-
-    @NotNull
-    private Long bookingId; // linked to Booking
-
-    @NotNull
-    private Double amount;
-
-    @NotNull
-    private String paymentMethod; // e.g., credit_card, paypal
+    private Long bookingId;
+    private BigDecimal amount;
+    private PaymentMethod paymentMethod;
+    private String transactionId; // for PayPal/GCash
+    private String proofUrl;      // for GCash uploads
 }

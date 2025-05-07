@@ -1,0 +1,32 @@
+.manager-navbar-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.manager-navbar-link.dropdown-toggle {
+  cursor: pointer;
+}
+.manager-navbar-dropdown-content {
+  display: none;
+  position: absolute;
+  background: #fff;
+  min-width: 170px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.13);
+  border-radius: 8px;
+  z-index: 100;
+  margin-top: 4px;
+}
+.manager-navbar-dropdown-content .manager-navbar-link {
+  display: block;
+  padding: 10px 18px;
+  color: #23406e;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.manager-navbar-dropdown-content .manager-navbar-link:hover {
+  background: #e6eefb;
+}
+.manager-navbar-dropdown:hover .manager-navbar-dropdown-content,
+.manager-navbar-dropdown:focus-within .manager-navbar-dropdown-content {
+  display: block;
+}

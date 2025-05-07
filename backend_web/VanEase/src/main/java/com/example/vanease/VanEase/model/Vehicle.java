@@ -1,5 +1,7 @@
 package com.example.vanease.VanEase.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -59,7 +61,8 @@ public class Vehicle {
 
     @NotNull
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private Boolean availability = true;
+    @Builder.Default
+    private boolean availability = true;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -79,10 +82,12 @@ public class Vehicle {
     @Column(name = "image_size")
     private Long imageSize;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "manager_id", nullable = false)
+    @JsonIgnore
     private User manager;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Booking> bookings;
 }

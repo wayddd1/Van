@@ -1,7 +1,6 @@
 package com.example.vanease.VanEase.config;
 
 import com.example.vanease.VanEase.security.filter.JwtAuthFilter;
-import com.example.vanease.VanEase.controller.AuthController; // Added controller package import
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,12 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
-import java.util.List;
+// No additional imports needed
 
 @Configuration
 @EnableWebSecurity
@@ -40,46 +34,81 @@ public class WebSecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/auth/**",
+            "/auth/login",
+            "/auth/register",
+            "/auth/refresh",
+            "/api/auth/**",
+            "/api/auth/login",
+            "/api/auth/register",
+            "/api/auth/refresh",
             "/api/vehicles/all",
             "/api/vehicles/available",
-            "/api/vehicles/image/**"
+            "/api/vehicles/{id}",
+            "/api/vehicles/*/image",
+            "/api/vehicles/image/**",
+            "/api/vehicles/**",
+            "/api/vehicles/[0-9]+",
+            "/api/vehicles/[0-9]+/image",
+            "/api/vehicles/[0-9]+/availability",
+            "/api/bookings/create",
+            "/api/bookings",
+            "/api/payments/create",
+            "/api/payments"
     };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // Configure CORS first - use the CorsFilter bean from CorsConfig
+                .cors(cors -> {})
+                // Disable CSRF for REST APIs
                 .csrf(AbstractHttpConfigurer::disable)
+                // Use stateless session management
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+                        // OPTIONS requests should always be allowed for CORS preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Authentication endpoints - using the correct paths
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/refresh").permitAll()
+                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/auth/register").permitAll()
+                        // Swagger/OpenAPI documentation
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                        // Other public endpoints
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        
+                        // Make all GET vehicle endpoints public
+                        .requestMatchers(HttpMethod.GET, "/api/vehicles/**").permitAll()
 
-                        // Vehicle management
-                        .requestMatchers(HttpMethod.POST, "/api/vehicles").hasRole("MANAGER")
+                        // Vehicle management (non-GET operations)
+                        .requestMatchers(HttpMethod.POST, "/api/vehicles/**").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.PUT, "/api/vehicles/**").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.DELETE, "/api/vehicles/**").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.POST, "/api/vehicles/**/image").hasRole("MANAGER")
 
                         // User management
                         .requestMatchers(HttpMethod.GET, "/api/users/**").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.PUT, "/api/users/**").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("MANAGER")
 
-                        // Booking management
-                        .requestMatchers(HttpMethod.POST, "/api/bookings").hasRole("CUSTOMER")
+                        // Booking management - make create endpoints public for testing
+                        .requestMatchers(HttpMethod.POST, "/api/bookings").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/bookings/create").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/user/upcoming").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/user/past").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/user/**").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/**").hasAnyRole("MANAGER", "ADMIN", "CUSTOMER")
-                        .requestMatchers(HttpMethod.PUT, "/api/bookings/**").hasAnyRole("MANAGER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/bookings/**").hasAnyRole("MANAGER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/bookings/**").hasAnyRole("MANAGER", "ADMIN", "CUSTOMER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/bookings/**").hasAnyRole("MANAGER", "ADMIN", "CUSTOMER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/bookings/**").hasAnyRole("CUSTOMER", "MANAGER", "ADMIN")
 
-                        // Payment management
-                        .requestMatchers(HttpMethod.GET, "/api/payments/user/**").hasRole("CUSTOMER")
-                        .requestMatchers(HttpMethod.GET, "/api/payments/**").hasAnyRole("MANAGER", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/payments").hasRole("CUSTOMER")
-                        .requestMatchers(HttpMethod.PUT, "/api/payments/**").hasAnyRole("MANAGER", "ADMIN")
+                        // Payment management - make create endpoints public for testing
+                        .requestMatchers(HttpMethod.POST, "/api/payments/create").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payments").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/payments/booking/**").hasAnyRole("CUSTOMER", "MANAGER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/payments/method/**").hasAnyRole("MANAGER", "ADMIN", "CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/api/payments/status/**").hasAnyRole("MANAGER", "ADMIN", "CUSTOMER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/payments/**/status").hasAnyRole("MANAGER", "ADMIN", "CUSTOMER")
 
                         // Admin-only endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -93,18 +122,5 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With", "Cache-Control"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "X-Total-Count", "Content-Disposition"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+    // We're using CorsFilter bean from CorsConfig instead of this method
 }

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import java.time.LocalDate;
+import java.math.BigDecimal;
 
 @Data
 public class BookingRequestDTO {
@@ -24,4 +25,7 @@ public class BookingRequestDTO {
 
     @NotNull
     private String dropoffLocation;
+
+    // Optional: total price for display/validation
+    private BigDecimal totalPrice;
 }

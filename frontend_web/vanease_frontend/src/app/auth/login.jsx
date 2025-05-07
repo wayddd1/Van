@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-toastify';
 import {
   Box,
   TextField,
@@ -19,6 +20,9 @@ const Login = () => {
   });
   const [localError, setLocalError] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = location.state?.returnTo;
+  const bookingData = location.state?.bookingData;
 
   const {
     login,
@@ -30,15 +34,26 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated && role) {
-      if (role === 'CUSTOMER') {
-        navigate('/customer-dashboard');
-      } else if (role === 'MANAGER') {
-        navigate('/manager-dashboard');
+      console.log('Authentication state changed - User is authenticated with role:', role);
+      
+      // If there's a return path, navigate there instead of the dashboard
+      if (returnTo) {
+        console.log('Redirecting to return path:', returnTo);
+        navigate(returnTo, { state: { bookingData } });
       } else {
-        navigate('/dashboard'); // fallback
+        // Default navigation based on role
+        if (role === 'CUSTOMER') {
+          console.log('Redirecting to customer dashboard');
+          navigate('/customer/dashboard');
+        } else if (role === 'MANAGER') {
+          console.log('Redirecting to manager dashboard');
+          navigate('/manager/manager-dashboard');
+        } else {
+          console.log('Unknown role:', role);
+        }
       }
     }
-  }, [isAuthenticated, role, navigate]);
+  }, [isAuthenticated, role, navigate, returnTo, bookingData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,26 +64,51 @@ const Login = () => {
     setLocalError(null);
   };
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLocalError(null);
+    if (!validateEmail(formData.email)) {
+      setLocalError('Please enter a valid email address');
+      return;
+    }
 
     if (!formData.email || !formData.password) {
       setLocalError('Please fill in all fields');
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setLocalError('Please enter a valid email address');
-      return;
-    }
-
     try {
-      await login(formData);
+      console.log('Submitting login with data:', formData);
+      const result = await login(formData);
+      
+      // If we get here, login was successful
+      console.log('Login successful with result:', result);
+      toast.success('Login successful!');
+      
+      // Force navigation if useEffect doesn't trigger
+      setTimeout(() => {
+        if (returnTo) {
+          console.log('Manually navigating to return path:', returnTo);
+          navigate(returnTo, { state: { bookingData } });
+        } else {
+          const userRole = result?.user?.role || localStorage.getItem('userRole') || 'CUSTOMER';
+          console.log('Manually navigating based on role:', userRole);
+          
+          if (userRole === 'CUSTOMER') {
+            navigate('/customer/dashboard');
+          } else if (userRole === 'MANAGER') {
+            navigate('/manager/manager-dashboard');
+          }
+        }
+      }, 500); // Short delay to allow state to update
     } catch (err) {
       console.error('Login error:', err);
       setLocalError(err.message || 'Login failed. Please try again.');
+      toast.error('Login failed. Please try again.');
     }
   };
 

@@ -29,7 +29,7 @@ export default function ManagerNavbar() {
       <div className="manager-navbar-container">
         {/* Logo and badge */}
         <div className="manager-navbar-logo-section">
-          <Link to="/manager-dashboard" className="manager-navbar-logo">
+          <Link to="/manager/manager-dashboard" className="manager-navbar-logo">
             <span className="logo-text">VanEase</span>
           </Link>
           <div className="manager-badge">Manager Portal</div>
@@ -44,22 +44,30 @@ export default function ManagerNavbar() {
         <div className={`manager-navbar-menu ${isMenuOpen ? "active" : ""}`}>
           <div className="manager-navbar-links">
             <Link
-              to="/manager-dashboard"
-              className={`manager-navbar-link ${location.pathname === "/manager-dashboard" ? "active" : ""}`}
+              to="/manager/manager-dashboard"
+              className={`manager-navbar-link ${location.pathname === "/manager/manager-dashboard" ? "active" : ""}`}
             >
               Dashboard
             </Link>
             <Link
-              to="/manager-vans"
-              className={`manager-navbar-link ${location.pathname === "/manager-vans" ? "active" : ""}`}
+              to="/manager/van-list"
+              className={`manager-navbar-link ${(location.pathname === "/manager/van-list" || location.pathname === "/manager/van-add") ? "active" : ""}`}
             >
-              Manage Vans
+              Manage Vehicles
             </Link>
             <Link
-              to="/manager-bookings"
-              className={`manager-navbar-link ${location.pathname === "/manager-bookings" ? "active" : ""}`}
+              to="#"
+              className="manager-navbar-link"
+              onClick={e => { e.preventDefault(); alert('Reports feature coming soon!'); }}
             >
-              Manage Bookings
+              View Reports
+            </Link>
+            <Link
+              to="#"
+              className="manager-navbar-link"
+              onClick={e => { e.preventDefault(); alert('Customer feedback feature coming soon!'); }}
+            >
+              Customer Feedback
             </Link>
           </div>
 

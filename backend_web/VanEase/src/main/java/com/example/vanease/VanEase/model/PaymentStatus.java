@@ -2,6 +2,7 @@ package com.example.vanease.VanEase.model;
 
 public enum PaymentStatus {
     PENDING,
-    COMPLETED,
-    FAILED
+    SUCCESS,
+    FAILED,
+    CANCELLED
 }

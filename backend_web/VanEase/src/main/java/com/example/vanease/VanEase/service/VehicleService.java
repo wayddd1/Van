@@ -9,10 +9,12 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import com.example.vanease.VanEase.model.VehicleStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -78,6 +80,9 @@ public class VehicleService {
     }
 
     public Vehicle getVehicleById(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Vehicle ID cannot be null");
+        }
         return vehicleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Vehicle not found with ID: " + id));
     }
@@ -113,5 +118,13 @@ public class VehicleService {
         vehicle.setImageSize(null);
 
         vehicleRepository.save(vehicle);
+    }
+
+    public List<Vehicle> getAllVehicles() {
+        return vehicleRepository.findAll();
+    }
+    
+    public List<Vehicle> getAvailableVehicles() {
+        return vehicleRepository.findByStatusAndAvailability(VehicleStatus.AVAILABLE, true);
     }
 }

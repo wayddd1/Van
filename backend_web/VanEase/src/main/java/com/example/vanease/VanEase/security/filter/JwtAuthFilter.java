@@ -1,7 +1,8 @@
 package com.example.vanease.VanEase.security.filter;
 
-import com.example.vanease.VanEase.security.service.CustomUserDetailsService;
 import com.example.vanease.VanEase.security.service.JwtService;
+import com.example.vanease.VanEase.security.service.CustomUserDetailsService;
+import com.example.vanease.VanEase.model.User;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
@@ -69,6 +70,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     );
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    // ADDITIONAL BLOCK: set domain user object to request attribute
+                    User domainUser = userDetailsService.loadDomainUserByUsername(userEmail);
+                    request.setAttribute("user", domainUser);
                 }
             }
 

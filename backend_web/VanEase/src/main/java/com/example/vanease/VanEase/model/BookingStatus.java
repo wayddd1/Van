@@ -1,9 +1,15 @@
 package com.example.vanease.VanEase.model;
 
+/**
+ * Enum representing the possible states of a booking in the system.
+ */
 public enum BookingStatus {
+
     PENDING,
     CONFIRMED,
-    CANCELLED,
+    ACTIVE,
     COMPLETED,
-    ACTIVE
+    CANCELLED,
+    REJECTED,
+    PAYMENT_FAILED
 }

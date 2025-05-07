@@ -27,8 +27,10 @@ public class Notification {
     private String message;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean isRead = false;
 
     @Column(nullable = false)
+    @Builder.Default
     private LocalDateTime sentAt = LocalDateTime.now();
 }

@@ -8,6 +8,31 @@ export default function Navbar() {
   const { user, token, logout } = useAuth(); // Get user info, token, and logout function from context
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // Check localStorage directly as a fallback
+  const localStorageToken = localStorage.getItem('token');
+  
+  // Parse user from localStorage if available
+  const localStorageUser = localStorage.getItem('user') ? 
+    JSON.parse(localStorage.getItem('user')) : null;
+  
+  // Use either context token or localStorage token
+  const isAuthenticated = !!token || !!localStorageToken;
+  
+  // Get user role from localStorage if not available in context
+  const userRole = user?.role || localStorageUser?.role;
+  
+  // Debug authentication state
+  useEffect(() => {
+    console.log('Auth state:', { 
+      contextToken: !!token, 
+      localToken: !!localStorageToken,
+      isAuthenticated,
+      contextUser: user,
+      localUser: localStorageUser,
+      userRole
+    });
+  }, [token, localStorageToken, user, localStorageUser, userRole]);
 
   useEffect(() => {
     // Close mobile menu when route changes
@@ -20,18 +45,19 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout(); // Call the logout function from context
+    // Also clear localStorage directly as a fallback
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('refreshToken');
     navigate("/"); // Redirect to the homepage or login page
   };
-
-  // Check if user is authenticated
-  const isAuthenticated = !!token;
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-logo">
+        <span className="navbar-logo">
           <span className="logo-text">VanEase</span>
-        </Link>
+        </span>
 
         <div className="navbar-toggle" onClick={toggleMenu} aria-label="Toggle navigation menu">
           <span className="toggle-icon">{isMenuOpen ? "✕" : "☰"}</span>
@@ -39,24 +65,14 @@ export default function Navbar() {
 
         <div className={`navbar-menu ${isMenuOpen ? "active" : ""}`}>
           <div className="navbar-links">
-            <Link to="/" className="navbar-link">Home</Link>
-            <Link to="/our-vans" className="navbar-link">Our Vans</Link>
-            <Link to="/book-van" className="navbar-link">Book a Van</Link>
-
             {/* Conditional links based on role */}
-            {user?.role === 'MANAGER' && (
+            {(userRole === 'CUSTOMER' || localStorageUser?.role === 'CUSTOMER') && (
               <>
-                <Link to="/manager-dashboard" className="navbar-link">Manager Dashboard</Link>
-                <Link to="/manager-vans" className="navbar-link">Manage Vans</Link>
+                <Link to="/customer/dashboard" className="navbar-link">Dashboard</Link>
+                <Link to="/customer/van-list" className="navbar-link">Van List</Link>
+                <Link to="/customer/booking" className="navbar-link">Book A Van</Link>
+                <Link to="/payment" className="navbar-link">Payment</Link>
               </>
-            )}
-            {user?.role === 'CUSTOMER' && (
-              <Link to="/customer-dashboard" className="navbar-link">Customer Dashboard</Link>
-            )}
-
-            {/* My Bookings link only visible if logged in */}
-            {isAuthenticated && (
-              <Link to="/my-bookings" className="navbar-link">My Bookings</Link>
             )}
           </div>
 
@@ -65,7 +81,7 @@ export default function Navbar() {
               <>
                 <Link to="/profile" className="navbar-profile">
                   <span className="profile-icon">👤</span>
-                  <span className="profile-text">Profile</span>
+                  <span className="profile-text">{user?.name || localStorageUser?.name || 'Profile'}</span>
                 </Link>
                 <button onClick={handleLogout} className="navbar-button logout-button">
                   Logout

@@ -54,4 +54,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 
     // Search methods for filtering
     List<Vehicle> findByBrandContainingIgnoreCaseOrModelContainingIgnoreCase(String brand, String model);
+    
+    // Find by status and availability
+    List<Vehicle> findByStatusAndAvailability(VehicleStatus status, Boolean availability);
 }

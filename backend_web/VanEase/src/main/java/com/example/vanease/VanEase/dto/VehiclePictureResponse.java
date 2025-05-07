@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VehiclePictureResponse {
+
     @Schema(description = "Vehicle ID", example = "123")
     private Long vehicleId;
 
