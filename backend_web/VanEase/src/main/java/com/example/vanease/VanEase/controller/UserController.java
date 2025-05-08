@@ -8,8 +8,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -47,6 +50,13 @@ public class UserController {
     @GetMapping("/exists/{email}")
     public boolean existsByEmail(@PathVariable String email) {
         return userService.existsByEmail(email);
+    }
+    
+    @Operation(summary = "Get all users - manager only")
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('MANAGER')")
+    public List<UserResponseDTO> getAllUsers() {
+        return userService.getAllUsers();
     }
 
 }

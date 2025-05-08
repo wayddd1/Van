@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
+import { axiosInstance } from '../../context/AuthContext';
+import { 
+  FaCalendarAlt, FaMapMarkerAlt, FaUser, FaEnvelope, FaPhone, 
+  FaMoneyBillWave, FaCheck, FaInfoCircle, FaClock, FaUsers, 
+  FaCommentAlt, FaArrowLeft, FaArrowRight, FaCar
+} from 'react-icons/fa';
 import "./customer-van-booking.css";
 
 const initialState = {
@@ -9,6 +15,10 @@ const initialState = {
   endDate: "",
   pickupLocation: "",
   dropoffLocation: "",
+  pickupTime: "10:00", // Default pickup time
+  dropoffTime: "14:00", // Default dropoff time
+  numberOfPassengers: "",
+  specialRequests: "",
   fullName: "", 
   email: "", 
   phone: ""
@@ -35,24 +45,30 @@ const CustomerVanBooking = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [bookingId, setBookingId] = useState(null);
+  const [currentStep, setCurrentStep] = useState(1); // For multi-step form
+  const [dateAvailability, setDateAvailability] = useState({
+    checking: false,
+    available: true,
+    message: ''
+  });
 
   // Available vehicles
   const [vehicles, setVehicles] = useState([]);
   const [loadingVehicles, setLoadingVehicles] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
 
   // Check authentication and fetch vehicles on component mount
   useEffect(() => {
     const checkAuthAndFetchVehicles = async () => {
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          toast.error('Please log in to make a booking');
-          navigate('/auth/login', { state: { returnTo: '/customer/booking' } });
-          return;
-        }
+        // We don't need to redirect here since we're using ProtectedRoute
+        // The ProtectedRoute component will handle the authentication check
         
-        // Fetch available vehicles
-        fetchAvailableVehicles(token);
+        // Fetch available vehicles if we have a token
+        if (token) {
+          await fetchAvailableVehicles(token);
+        }
       } catch (error) {
         console.error('Error during initialization:', error);
         toast.error('Failed to initialize booking page. Please try again.');
@@ -67,439 +83,772 @@ const CustomerVanBooking = () => {
     setLoadingVehicles(true);
     try {
       console.log('Fetching available vehicles...');
-      const response = await fetch('http://localhost:8080/api/vehicles/available', {
-        method: 'GET',
+      const response = await axiosInstance.get('/api/vehicles/available', {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        },
-        credentials: 'include',
-        mode: 'cors'
+          'Authorization': `Bearer ${token}`
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`Error fetching vehicles: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = response.data;
       console.log('Available vehicles:', data);
       
-      // Process vehicle data to ensure image URLs are properly formatted
-      const processedVehicles = data.map(vehicle => ({
-        ...vehicle,
-        imageUrl: vehicle.imageUrl ? 
-          (vehicle.imageUrl.startsWith('http') || vehicle.imageUrl.startsWith('/') ? 
-            vehicle.imageUrl : 
-            `http://localhost:8080${vehicle.imageUrl.startsWith('/') ? '' : '/'}${vehicle.imageUrl}`
-          ) : 'https://via.placeholder.com/150x100?text=Van+Image'
-      }));
+      // Process vehicle data to ensure image URLs are properly formatted and filter only available vehicles
+      const processedVehicles = data
+        .filter(vehicle => vehicle.availability === true)
+        .map(vehicle => ({
+          ...vehicle,
+          imageUrl: vehicle.imageUrl ? 
+            (vehicle.imageUrl.startsWith('http') || vehicle.imageUrl.startsWith('/') ? 
+              vehicle.imageUrl : 
+              `http://localhost:8080${vehicle.imageUrl.startsWith('/') ? '' : '/'}${vehicle.imageUrl}`
+            ) : 'https://via.placeholder.com/150x100?text=Van+Image'
+        }));
       
       setVehicles(processedVehicles);
+      
+      // If we have a pre-selected vehicle, verify it's still available
+      if (preSelectedVehicleId) {
+        const vehicle = processedVehicles.find(v => v.id === parseInt(preSelectedVehicleId));
+        if (!vehicle) {
+          toast.warning('The selected vehicle is no longer available. Please choose another.');
+          setForm(prev => ({ ...prev, vehicleId: '' }));
+        } else {
+          setSelectedVehicle(vehicle);
+        }
+      }
     } catch (error) {
       console.error('Error fetching vehicles:', error);
       toast.warning('Could not load vehicles from server. Using sample data.');
       
       // Fallback to sample data
       const sampleVehicles = [
-        { id: 1, name: "Toyota HiAce", imageUrl: "https://via.placeholder.com/150x100?text=Toyota+HiAce", ratePerDay: 150.00, description: "Comfortable 10-seater van", status: "AVAILABLE" },
-        { id: 2, name: "Ford Transit", imageUrl: "https://via.placeholder.com/150x100?text=Ford+Transit", ratePerDay: 175.00, description: "Spacious 12-seater van with cargo space", status: "AVAILABLE" },
-        { id: 3, name: "Mercedes Sprinter", imageUrl: "https://via.placeholder.com/150x100?text=Mercedes", ratePerDay: 200.00, description: "Luxury 8-seater van", status: "AVAILABLE" }
+        { 
+          id: 1, 
+          brand: "Toyota", 
+          model: "HiAce", 
+          imageUrl: "https://via.placeholder.com/150x100?text=Toyota+HiAce", 
+          ratePerDay: 2500, 
+          description: "Comfortable 10-seater van", 
+          status: "AVAILABLE", 
+          availability: true, 
+          passengerCapacity: 10,
+          plateNumber: "ABC-123",
+          transmission: "Automatic",
+          fuelType: "Diesel",
+          year: 2022
+        },
+        { 
+          id: 2, 
+          brand: "Ford", 
+          model: "Transit", 
+          imageUrl: "https://via.placeholder.com/150x100?text=Ford+Transit", 
+          ratePerDay: 3000, 
+          description: "Spacious 12-seater van with cargo space", 
+          status: "AVAILABLE", 
+          availability: true, 
+          passengerCapacity: 12,
+          plateNumber: "DEF-456",
+          transmission: "Manual",
+          fuelType: "Diesel",
+          year: 2023
+        },
+        { 
+          id: 3, 
+          brand: "Mercedes", 
+          model: "Sprinter", 
+          imageUrl: "https://via.placeholder.com/150x100?text=Mercedes", 
+          ratePerDay: 3500, 
+          description: "Luxury 8-seater van", 
+          status: "AVAILABLE", 
+          availability: true, 
+          passengerCapacity: 8,
+          plateNumber: "GHI-789",
+          transmission: "Automatic",
+          fuelType: "Diesel",
+          year: 2024
+        }
       ];
       setVehicles(sampleVehicles);
+      
+      // If we have a pre-selected vehicle, find it in sample data
+      if (preSelectedVehicleId) {
+        const vehicle = sampleVehicles.find(v => v.id === parseInt(preSelectedVehicleId));
+        if (vehicle) {
+          setSelectedVehicle(vehicle);
+        }
+      }
     } finally {
       setLoadingVehicles(false);
     }
   };
+  
+  // Function to check date availability for a specific vehicle
+  const checkDateAvailability = async () => {
+    const { vehicleId, startDate, endDate } = form;
+    
+    if (!vehicleId || !startDate || !endDate) {
+      return; // Don't check if we don't have all required fields
+    }
+    
+    setDateAvailability(prev => ({ ...prev, checking: true }));
+    
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Call the API to check vehicle availability for the selected dates
+      const response = await axiosInstance.get(
+        `/api/vehicles/${vehicleId}/check-availability?startDate=${startDate}&endDate=${endDate}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      const available = response.data.available;
+      
+      setDateAvailability({
+        checking: false,
+        available,
+        message: available 
+          ? 'Vehicle is available for these dates!' 
+          : 'Vehicle is not available for these dates. Please select different dates.'
+      });
+      
+      if (!available) {
+        setErrors(prev => ({
+          ...prev,
+          dates: 'Vehicle is not available for these dates. Please select different dates.'
+        }));
+      } else {
+        // Clear date errors if dates are available
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.dates;
+          return newErrors;
+        });
+      }
+    } catch (error) {
+      console.error('Error checking date availability:', error);
+      
+      // Fallback to a simple check by comparing with existing bookings
+      // This is a client-side fallback in case the API call fails
+      const vehicle = vehicles.find(v => v.id === parseInt(vehicleId));
+      const available = !vehicle || !vehicle.bookings || vehicle.bookings.length === 0;
+      
+      setDateAvailability({
+        checking: false,
+        available,
+        message: available 
+          ? 'Vehicle appears to be available for these dates.' 
+          : 'Vehicle may not be available for these dates. Please try different dates.'
+      });
+    }
+  };
+  
+  // Check date availability when vehicle, start date, or end date changes
+  useEffect(() => {
+    if (form.vehicleId && form.startDate && form.endDate) {
+      checkDateAvailability();
+    }
+  }, [form.vehicleId, form.startDate, form.endDate]);
 
   // Calculate days between two dates, inclusive (matching backend logic)
   const calculateDays = (startDate, endDate) => {
     if (!startDate || !endDate) return 0;
     
-    // Create date objects without time component to match backend calculation
     const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
-    
     const end = new Date(endDate);
+    
+    // Reset time to compare dates only
+    start.setHours(0, 0, 0, 0);
     end.setHours(0, 0, 0, 0);
     
-    if (end < start) return 0;
-    
-    // Calculate days between dates and add 1 to include both start and end dates
-    // This matches the backend logic: ChronoUnit.DAYS.between(startDate, endDate) + 1
+    // Calculate difference in days
     const diffTime = Math.abs(end - start);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays + 1; // Add 1 to include both start and end dates
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    // Add 1 to include both start and end days
+    return diffDays + 1;
   };
 
   // Calculate total price (matching backend logic)
   const calculateTotalPrice = () => {
-    // If we have a pre-selected rate, use that
-    const ratePerDay = preSelectedRate || (() => {
-      const selectedVehicle = vehicles.find(v => v.id === parseInt(form.vehicleId));
-      return selectedVehicle ? selectedVehicle.ratePerDay : null;
-    })();
+    if (!form.vehicleId || !form.startDate || !form.endDate) {
+      setCalculatedPrice("");
+      return;
+    }
     
-    if (!ratePerDay) return "";
+    const vehicle = vehicles.find(v => v.id === parseInt(form.vehicleId));
+    if (!vehicle) {
+      setCalculatedPrice("");
+      return;
+    }
     
     const days = calculateDays(form.startDate, form.endDate);
-    if (days <= 0) return "";
+    if (days <= 0) {
+      setCalculatedPrice("");
+      return;
+    }
     
-    // Match backend calculation: vehicle.getRatePerDay().multiply(BigDecimal.valueOf(totalDays))
-    const totalPrice = parseFloat(ratePerDay) * days;
-    return totalPrice.toFixed(2);
+    const price = vehicle.ratePerDay * days;
+    setCalculatedPrice(price.toFixed(2));
+    return price;
   };
-  
+
   // Update price when dates or vehicle changes
   useEffect(() => {
     if (form.vehicleId && form.startDate && form.endDate) {
-      const price = calculateTotalPrice();
-      setCalculatedPrice(price);
+      calculateTotalPrice();
     }
   }, [form.vehicleId, form.startDate, form.endDate]);
 
   // Form validation
-  const validate = () => {
-    const errs = {};
-    if (!form.vehicleId) errs.vehicleId = "Please select a vehicle";
-    if (!form.startDate) errs.startDate = "Start date is required";
-    if (!form.endDate) errs.endDate = "End date is required";
-    if (form.startDate && form.endDate && new Date(form.endDate) < new Date(form.startDate)) {
-      errs.endDate = "End date must be after start date";
+  const validate = (step = 0) => {
+    const newErrors = {};
+    
+    // Validate all fields if step is 0, otherwise validate fields for the current step
+    if (step === 0 || step === 1) {
+      if (!form.vehicleId) newErrors.vehicleId = "Please select a vehicle";
+      if (!form.startDate) newErrors.startDate = "Please select a start date";
+      if (!form.endDate) newErrors.endDate = "Please select an end date";
+      
+      // Date validation
+      if (form.startDate && form.endDate) {
+        const start = new Date(form.startDate);
+        const end = new Date(form.endDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (start < today) {
+          newErrors.startDate = "Start date cannot be in the past";
+        }
+        
+        if (end < start) {
+          newErrors.endDate = "End date cannot be before start date";
+        }
+      }
     }
-    if (!form.pickupLocation) errs.pickupLocation = "Pickup location is required";
-    if (!form.dropoffLocation) errs.dropoffLocation = "Dropoff location is required";
-    if (!form.fullName) errs.fullName = "Full name is required";
-    if (!form.email) errs.email = "Email is required";
-    if (!form.phone) errs.phone = "Phone number is required";
-    return errs;
+    
+    if (step === 0 || step === 2) {
+      if (!form.pickupLocation) newErrors.pickupLocation = "Please enter pickup location";
+      if (!form.dropoffLocation) newErrors.dropoffLocation = "Please enter dropoff location";
+      if (!form.pickupTime) newErrors.pickupTime = "Please select pickup time";
+      if (!form.dropoffTime) newErrors.dropoffTime = "Please select dropoff time";
+      
+      if (form.numberOfPassengers) {
+        const passengers = parseInt(form.numberOfPassengers);
+        const vehicle = vehicles.find(v => v.id === parseInt(form.vehicleId));
+        
+        if (vehicle && passengers > vehicle.passengerCapacity) {
+          newErrors.numberOfPassengers = `Maximum capacity for this vehicle is ${vehicle.passengerCapacity} passengers`;
+        }
+      }
+    }
+    
+    if (step === 0 || step === 3) {
+      if (!form.fullName) newErrors.fullName = "Please enter your full name";
+      if (!form.email) newErrors.email = "Please enter your email";
+      if (!form.phone) newErrors.phone = "Please enter your phone number";
+      
+      // Email validation
+      if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+        newErrors.email = "Please enter a valid email address";
+      }
+      
+      // Phone validation
+      if (form.phone && !/^[0-9+\-\s()]{7,15}$/.test(form.phone)) {
+        newErrors.phone = "Please enter a valid phone number";
+      }
+    }
+    
+    // Check date availability
+    if (!dateAvailability.available && form.vehicleId && form.startDate && form.endDate) {
+      newErrors.dates = dateAvailability.message;
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
-
+  
   // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
     
-    // Price will be updated by the useEffect hook
+    // Clear specific error when field is changed
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+    
+    // If vehicle changes, update selected vehicle
+    if (name === 'vehicleId' && value) {
+      const vehicle = vehicles.find(v => v.id === parseInt(value));
+      setSelectedVehicle(vehicle || null);
+    }
+    
+    // Recalculate price when relevant fields change
+    if (['vehicleId', 'startDate', 'endDate'].includes(name)) {
+      setTimeout(calculateTotalPrice, 0);
+    }
   };
   
-  // Calculate initial price when component mounts if vehicle is pre-selected
-  useEffect(() => {
-    if (preSelectedVehicleId && preSelectedRate) {
-      setTimeout(() => {
-        const price = calculateTotalPrice();
-        setCalculatedPrice(price);
-      }, 0);
+  // Handle next step in multi-step form
+  const handleNextStep = () => {
+    const isValid = validate(currentStep);
+    
+    if (isValid) {
+      setCurrentStep(prev => Math.min(prev + 1, 4));
+      window.scrollTo(0, 0);
     }
-  }, [preSelectedVehicleId, preSelectedRate]);
-
+  };
+  
+  // Handle previous step in multi-step form
+  const handlePrevStep = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+    window.scrollTo(0, 0);
+  };
+  
   // Submit booking to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate the form
-    const formErrors = validate();
-    if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors);
-      toast.error('Please correct the errors in the form');
+    // Validate all fields
+    const isValid = validate(0);
+    if (!isValid) {
+      toast.error('Please fix the errors before submitting');
+      return;
+    }
+    
+    // Check if vehicle is available for selected dates
+    if (!dateAvailability.available) {
+      toast.error(dateAvailability.message);
       return;
     }
     
     setLoading(true);
-    setErrors({});
     
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        toast.error('Please log in to book a vehicle');
-        navigate('/auth/login', { state: { returnTo: '/customer/booking' } });
-        return;
-      }
       
-      // Calculate the total price
-      const totalPrice = calculatedPrice || calculateTotalPrice();
+      // Calculate total price
+      const totalPrice = calculateTotalPrice();
       
-      // Prepare booking data
+      // Prepare booking data according to BookingRequestDTO structure
       const bookingData = {
         vehicleId: parseInt(form.vehicleId),
         startDate: form.startDate,
         endDate: form.endDate,
         pickupLocation: form.pickupLocation,
         dropoffLocation: form.dropoffLocation,
-        totalPrice: parseFloat(totalPrice)
+        totalPrice: totalPrice || null
       };
+      
+      // Add additional fields that will be stored in the booking metadata
+      const bookingMetadata = {
+        pickupTime: form.pickupTime,
+        dropoffTime: form.dropoffTime,
+        numberOfPassengers: form.numberOfPassengers ? parseInt(form.numberOfPassengers) : null,
+        specialRequests: form.specialRequests,
+        customerDetails: {
+          fullName: form.fullName,
+          email: form.email,
+          phone: form.phone
+        }
+      };
+      
+      // Combine data for the frontend, but only send the required fields to the backend
+      const fullBookingData = { ...bookingData, ...bookingMetadata };
       
       console.log('Submitting booking:', bookingData);
       
-      // First try the /api/bookings endpoint
-      let response;
-      try {
-        response = await fetch('http://localhost:8080/api/bookings', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
-          },
-          credentials: 'include',
-          mode: 'cors',
-          body: JSON.stringify(bookingData)
-        });
-        
-        // If we get a 403, try the /create endpoint
-        if (response.status === 403) {
-          console.log('Trying alternative endpoint /api/bookings/create due to 403');
-          response = await fetch('http://localhost:8080/api/bookings/create', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-              'Accept': 'application/json'
-            },
-            credentials: 'include',
-            mode: 'cors',
-            body: JSON.stringify(bookingData)
-          });
+      // Submit booking to backend
+      const response = await axiosInstance.post('/api/bookings/create', bookingData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      } catch (error) {
-        console.error('Network error during booking submission:', error);
-        throw new Error('Network error. Please check your connection and try again.');
-      }
+      });
       
-      // Handle response
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Booking failed with status ${response.status}:`, errorText);
-        
-        if (response.status === 500 && errorText.includes('not available')) {
-          throw new Error('This vehicle is not available for the selected dates. Please choose different dates.');
-        } else if (response.status === 403) {
-          throw new Error('You do not have permission to make bookings. Please log in with a customer account.');
-        } else {
-          throw new Error(`Booking failed: ${response.status} ${response.statusText}`);
-        }
-      }
+      console.log('Booking response:', response.data);
       
-      const responseData = await response.json();
-      console.log('Booking created successfully:', responseData);
+      // Store complete booking data in localStorage for payment page
+      const booking = { ...response.data, ...bookingMetadata };
+      localStorage.setItem('currentBooking', JSON.stringify(booking));
       
-      // Save booking data for the payment page
-      localStorage.setItem('currentBooking', JSON.stringify(responseData));
-      
-      // Reset form and show success
+      // Update state
+      setBookingId(booking.id);
       setSuccess(true);
-      setBookingId(responseData.id || responseData.bookingId);
-      setForm(initialState);
-      setCalculatedPrice("");
+      setLoading(false);
+      
+      // Show success message
       toast.success('Booking created successfully!');
+      
+      // Navigate to payment page
+      setTimeout(() => {
+        navigate(`/customer/payment/${booking.id}`, {
+          state: { bookingData: booking }
+        });
+      }, 1500);
       
     } catch (error) {
       console.error('Error creating booking:', error);
-      setErrors({ submit: error.message });
-      toast.error(error.message);
-    } finally {
+      
+      let errorMessage = 'Failed to create booking. Please try again.';
+      
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error request:', error.request);
+        errorMessage = 'Network error. Please check your connection and try again.';
+      }
+      
+      toast.error(errorMessage);
       setLoading(false);
     }
   };
-
+  
+  // Render vehicle selection step
+  const renderVehicleSelection = () => {
+    return (
+      <div className="booking-step">
+        <h2>Select a Vehicle</h2>
+        <p>Choose a vehicle for your trip</p>
+        
+        {loadingVehicles ? (
+          <div className="loading-message">Loading available vehicles...</div>
+        ) : vehicles.length === 0 ? (
+          <div className="no-vehicles-message">
+            <p>No vehicles available for the selected dates.</p>
+            <p>Please try different dates or contact support.</p>
+          </div>
+        ) : (
+          <div className="vehicle-selection">
+            <div className="vehicle-list">
+              <label>Vehicle:</label>
+              <select 
+                name="vehicleId" 
+                value={form.vehicleId} 
+                onChange={handleChange}
+                className="vehicle-select-dropdown"
+              >
+                <option value="">-- Select a vehicle --</option>
+                {vehicles.map(vehicle => (
+                  <option key={vehicle.id} value={vehicle.id.toString()}>
+                    {vehicle.brand} {vehicle.model} - ₱{vehicle.ratePerDay}/day - {vehicle.passengerCapacity} passengers
+                  </option>
+                ))}
+              </select>
+              {errors.vehicleId && <div className="form-error">{errors.vehicleId}</div>}
+            </div>
+            
+            {selectedVehicle && (
+              <div className="selected-vehicle-info">
+                <h3>Selected Vehicle Details</h3>
+                <div className="vehicle-info-grid">
+                  <div className="info-row">
+                    <span className="info-label">Vehicle:</span>
+                    <span className="info-value">{selectedVehicle.brand} {selectedVehicle.model}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Plate Number:</span>
+                    <span className="info-value">{selectedVehicle.plateNumber}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Capacity:</span>
+                    <span className="info-value">{selectedVehicle.passengerCapacity} passengers</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Rate:</span>
+                    <span className="info-value">₱{selectedVehicle.ratePerDay}/day</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        
+        <div className="date-selection">
+          <div className="form-row">
+            <div className="form-group">
+              <label><FaCalendarAlt /> Start Date</label>
+              <input 
+                type="date" 
+                name="startDate" 
+                value={form.startDate} 
+                onChange={handleChange}
+                min={new Date().toISOString().split('T')[0]}
+              />
+              {errors.startDate && <div className="form-error">{errors.startDate}</div>}
+            </div>
+            <div className="form-group">
+              <label><FaCalendarAlt /> End Date</label>
+              <input 
+                type="date" 
+                name="endDate" 
+                value={form.endDate} 
+                onChange={handleChange}
+                min={form.startDate || new Date().toISOString().split('T')[0]}
+              />
+              {errors.endDate && <div className="form-error">{errors.endDate}</div>}
+            </div>
+          </div>
+          
+          {dateAvailability.checking ? (
+            <div className="availability-checking">Checking availability...</div>
+          ) : form.vehicleId && form.startDate && form.endDate ? (
+            <div className={`availability-status ${dateAvailability.available ? 'available' : 'unavailable'}`}>
+              <FaInfoCircle /> {dateAvailability.message}
+            </div>
+          ) : null}
+        </div>
+        
+        {errors.vehicleId && <div className="form-error">{errors.vehicleId}</div>}
+        {errors.dates && <div className="form-error">{errors.dates}</div>}
+        
+        <div className="step-buttons">
+          <button 
+            type="button" 
+            className="next-btn" 
+            onClick={handleNextStep}
+            disabled={!form.vehicleId || !form.startDate || !form.endDate || !dateAvailability.available}
+          >
+            Next: Trip Details <FaArrowRight />
+          </button>
+        </div>
+      </div>
+    );
+  };
+  
+  // Render trip details step
+  const renderTripDetails = () => {
+    return (
+      <div className="booking-step">
+        <h2>Trip Details</h2>
+        <p>Provide pickup and dropoff information</p>
+        
+        {selectedVehicle && (
+          <div className="selected-vehicle-summary">
+            <h3>Selected Vehicle: {selectedVehicle.brand} {selectedVehicle.model}</h3>
+            <p>₱{selectedVehicle.ratePerDay}/day × {calculateDays(form.startDate, form.endDate)} days = ₱{calculatedPrice}</p>
+          </div>
+        )}
+        
+        <div className="form-row">
+          <div className="form-group">
+            <label><FaMapMarkerAlt /> Pickup Location</label>
+            <input 
+              name="pickupLocation" 
+              value={form.pickupLocation} 
+              onChange={handleChange} 
+              placeholder="Enter pickup location"
+            />
+            {errors.pickupLocation && <div className="form-error">{errors.pickupLocation}</div>}
+          </div>
+          <div className="form-group">
+            <label><FaMapMarkerAlt /> Dropoff Location</label>
+            <input 
+              name="dropoffLocation" 
+              value={form.dropoffLocation} 
+              onChange={handleChange} 
+              placeholder="Enter dropoff location"
+            />
+            {errors.dropoffLocation && <div className="form-error">{errors.dropoffLocation}</div>}
+          </div>
+        </div>
+        
+        <div className="form-row">
+          <div className="form-group">
+            <label><FaClock /> Pickup Time</label>
+            <input 
+              type="time" 
+              name="pickupTime" 
+              value={form.pickupTime} 
+              onChange={handleChange}
+            />
+            {errors.pickupTime && <div className="form-error">{errors.pickupTime}</div>}
+          </div>
+          <div className="form-group">
+            <label><FaClock /> Dropoff Time</label>
+            <input 
+              type="time" 
+              name="dropoffTime" 
+              value={form.dropoffTime} 
+              onChange={handleChange}
+            />
+            {errors.dropoffTime && <div className="form-error">{errors.dropoffTime}</div>}
+          </div>
+        </div>
+        
+        <div className="form-row">
+          <div className="form-group">
+            <label><FaUsers /> Number of Passengers</label>
+            <input 
+              type="number" 
+              name="numberOfPassengers" 
+              value={form.numberOfPassengers} 
+              onChange={handleChange} 
+              placeholder="Enter number of passengers"
+              min="1"
+              max={selectedVehicle ? selectedVehicle.passengerCapacity : ""}
+            />
+            {errors.numberOfPassengers && <div className="form-error">{errors.numberOfPassengers}</div>}
+          </div>
+          <div className="form-group">
+            <label><FaCommentAlt /> Special Requests (Optional)</label>
+            <textarea 
+              name="specialRequests" 
+              value={form.specialRequests} 
+              onChange={handleChange} 
+              placeholder="Any special requests or requirements"
+            />
+          </div>
+        </div>
+        
+        <div className="step-buttons">
+          <button type="button" className="prev-btn" onClick={handlePrevStep}>
+            <FaArrowLeft /> Back: Vehicle Selection
+          </button>
+          <button type="button" className="next-btn" onClick={handleNextStep}>
+            Next: Contact Information <FaArrowRight />
+          </button>
+        </div>
+      </div>
+    );
+  };
+  
+  // Render contact information step
+  const renderContactInfo = () => {
+    return (
+      <div className="booking-step">
+        <h2>Contact Information</h2>
+        <p>Provide your contact details</p>
+        
+        <div className="form-row">
+          <div className="form-group">
+            <label><FaUser /> Full Name</label>
+            <input 
+              name="fullName" 
+              value={form.fullName} 
+              onChange={handleChange} 
+              placeholder="Enter your full name"
+            />
+            {errors.fullName && <div className="form-error">{errors.fullName}</div>}
+          </div>
+        </div>
+        
+        <div className="form-row">
+          <div className="form-group">
+            <label><FaEnvelope /> Email</label>
+            <input 
+              type="email"
+              name="email" 
+              value={form.email} 
+              onChange={handleChange} 
+              placeholder="Enter your email"
+            />
+            {errors.email && <div className="form-error">{errors.email}</div>}
+          </div>
+          <div className="form-group">
+            <label><FaPhone /> Phone</label>
+            <input 
+              name="phone" 
+              value={form.phone} 
+              onChange={handleChange} 
+              placeholder="Enter your phone number"
+            />
+            {errors.phone && <div className="form-error">{errors.phone}</div>}
+          </div>
+        </div>
+        
+        <div className="booking-summary">
+          <h3>Booking Summary</h3>
+          <div className="summary-details">
+            <div className="summary-item">
+              <span className="summary-label">Vehicle:</span>
+              <span className="summary-value">{selectedVehicle ? `${selectedVehicle.brand} ${selectedVehicle.model}` : ''}</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Dates:</span>
+              <span className="summary-value">{form.startDate} to {form.endDate}</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Duration:</span>
+              <span className="summary-value">{calculateDays(form.startDate, form.endDate)} days</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Pickup:</span>
+              <span className="summary-value">{form.pickupLocation} at {form.pickupTime}</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Dropoff:</span>
+              <span className="summary-value">{form.dropoffLocation} at {form.dropoffTime}</span>
+            </div>
+            <div className="summary-item total">
+              <span className="summary-label">Total Price:</span>
+              <span className="summary-value">₱{calculatedPrice}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="step-buttons">
+          <button type="button" className="prev-btn" onClick={handlePrevStep}>
+            <FaArrowLeft /> Back: Trip Details
+          </button>
+          <button type="submit" className="submit-btn" disabled={loading}>
+            {loading ? "Processing..." : "Complete Booking"}
+          </button>
+        </div>
+      </div>
+    );
+  };
+  
+  // Render success message
+  const renderSuccess = () => {
+    return (
+      <div className="booking-success">
+        <div className="success-icon">✓</div>
+        <h2>Booking Successful!</h2>
+        <p>Your booking has been created successfully.</p>
+        <p>Booking ID: {bookingId}</p>
+        <button 
+          className="payment-btn"
+          onClick={() => navigate(`/customer/payment/${bookingId}`, {
+            state: { bookingData: JSON.parse(localStorage.getItem('currentBooking')) }
+          })}
+        >
+          Proceed to Payment
+        </button>
+      </div>
+    );
+  };
+  
   return (
     <div className="van-booking-main">
-      <div className="van-booking-grid">
-        {/* Left panel with info */}
-        <div className="booking-info-panel">
-          <h2 className="booking-info-title">Booking Information</h2>
-          <ul className="booking-features-list">
-            <li><span className="feature-icon">🕒</span> <b>Flexible Rental Periods</b><br /><span className="feature-desc">Daily, weekly, and monthly rental options available to suit your schedule.</span></li>
-            <li><span className="feature-icon">🛣️</span> <b>Variety of Options</b><br /><span className="feature-desc">Choose from our range of vans to match your specific requirements.</span></li>
-            <li><span className="feature-icon">📍</span> <b>Multiple Locations</b><br /><span className="feature-desc">Convenient pickup and drop-off points throughout the city.</span></li>
-          </ul>
-          <div className="booking-help">
-            <b>Need help?</b><br />
-            Contact our customer service team for assistance.<br />
-            <span className="help-phone">Call us: <b>(123) 456-7890</b></span>
-          </div>
-        </div>
-
-        {/* Right panel with booking form */}
-        <div className="booking-form-panel">
-          <h2 className="booking-form-title">Book Your Van</h2>
-          <p className="booking-form-desc">Fill out the form below to reserve your van.</p>
-          
-          {/* Vehicle Selection */}
-          <div className="vehicle-selection-container">
-            <h3>{preSelectedVehicleId ? "Selected Vehicle" : "Select a Vehicle"}</h3>
-            
-            {/* Show pre-selected vehicle if available */}
-            {preSelectedVehicleId && preSelectedVehicleName && (
-              <div className="pre-selected-vehicle">
-                <div className="vehicle-card selected">
-                  {preSelectedVehicleImage && (
-                    <img 
-                      src={preSelectedVehicleImage} 
-                      alt={preSelectedVehicleName} 
-                      className="vehicle-image"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://via.placeholder.com/150x100?text=Van+Image';
-                      }}
-                    />
-                  )}
-                  <h4>{preSelectedVehicleName}</h4>
-                  <div className="vehicle-rate">₱{preSelectedRate}/day</div>
-                </div>
-              </div>
-            )}
-            
-            {/* Show vehicle selection if no pre-selected vehicle */}
-            {!preSelectedVehicleId && (
-              loadingVehicles ? (
-                <div className="loading-vehicles">Loading available vehicles...</div>
-              ) : vehicles.length === 0 ? (
-                <div className="no-vehicles">No vehicles are currently available.</div>
-              ) : (
-                <div className="vehicles-grid">
-                  {vehicles.map(vehicle => (
-                    <div 
-                      key={vehicle.id} 
-                      className={`vehicle-card ${parseInt(form.vehicleId) === vehicle.id ? 'selected' : ''}`}
-                      onClick={() => handleChange({ target: { name: 'vehicleId', value: vehicle.id.toString() } })}
-                    >
-                      <img 
-                        src={vehicle.imageUrl} 
-                        alt={vehicle.name} 
-                        className="vehicle-image"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'https://via.placeholder.com/150x100?text=Van+Image';
-                        }}
-                      />
-                      <h4>{vehicle.name}</h4>
-                      <p>{vehicle.description || 'No description available'}</p>
-                      <div className="vehicle-rate">₱{vehicle.ratePerDay}/day</div>
-                    </div>
-                  ))}
-                </div>
-              )
-            )}
-            {errors.vehicleId && <div className="form-error">{errors.vehicleId}</div>}
-          </div>
-          
-          {/* Booking Form */}
-          <form className="booking-form" onSubmit={handleSubmit}>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Pickup Location</label>
-                <input 
-                  name="pickupLocation" 
-                  value={form.pickupLocation} 
-                  onChange={handleChange} 
-                  placeholder="Enter pickup location"
-                />
-                {errors.pickupLocation && <div className="form-error">{errors.pickupLocation}</div>}
-              </div>
-              <div className="form-group">
-                <label>Dropoff Location</label>
-                <input 
-                  name="dropoffLocation" 
-                  value={form.dropoffLocation} 
-                  onChange={handleChange} 
-                  placeholder="Enter dropoff location"
-                />
-                {errors.dropoffLocation && <div className="form-error">{errors.dropoffLocation}</div>}
-              </div>
+      <div className="van-booking-container">
+        <h1 className="booking-title">Book a Van</h1>
+        
+        {success ? (
+          renderSuccess()
+        ) : (
+          <form onSubmit={handleSubmit} className="booking-form">
+            <div className="booking-progress">
+              <div className={`progress-step ${currentStep >= 1 ? 'active' : ''}`}>1. Vehicle</div>
+              <div className={`progress-step ${currentStep >= 2 ? 'active' : ''}`}>2. Trip Details</div>
+              <div className={`progress-step ${currentStep >= 3 ? 'active' : ''}`}>3. Contact</div>
             </div>
             
-            <div className="form-row">
-              <div className="form-group">
-                <label>Start Date</label>
-                <input 
-                  type="date" 
-                  name="startDate" 
-                  value={form.startDate} 
-                  onChange={handleChange}
-                  min={new Date().toISOString().split('T')[0]}
-                />
-                {errors.startDate && <div className="form-error">{errors.startDate}</div>}
-              </div>
-              <div className="form-group">
-                <label>End Date</label>
-                <input 
-                  type="date" 
-                  name="endDate" 
-                  value={form.endDate} 
-                  onChange={handleChange}
-                  min={form.startDate || new Date().toISOString().split('T')[0]}
-                />
-                {errors.endDate && <div className="form-error">{errors.endDate}</div>}
-              </div>
-            </div>
-            
-            <div className="form-row">
-              <div className="form-group">
-                <label>Full Name</label>
-                <input 
-                  name="fullName" 
-                  value={form.fullName} 
-                  onChange={handleChange} 
-                  placeholder="Enter your full name"
-                />
-                {errors.fullName && <div className="form-error">{errors.fullName}</div>}
-              </div>
-              <div className="form-group">
-                <label>Email</label>
-                <input 
-                  type="email"
-                  name="email" 
-                  value={form.email} 
-                  onChange={handleChange} 
-                  placeholder="Enter your email"
-                />
-                {errors.email && <div className="form-error">{errors.email}</div>}
-              </div>
-            </div>
-            
-            <div className="form-row">
-              <div className="form-group">
-                <label>Phone</label>
-                <input 
-                  name="phone" 
-                  value={form.phone} 
-                  onChange={handleChange} 
-                  placeholder="Enter your phone number"
-                />
-                {errors.phone && <div className="form-error">{errors.phone}</div>}
-              </div>
-              <div className="form-group">
-                <label>Total Price</label>
-                <input 
-                  value={calculatedPrice ? `₱${calculatedPrice}` : ''} 
-                  readOnly 
-                  className="price-display"
-                  placeholder="Select vehicle and dates to calculate"
-                />
-              </div>
-            </div>
-            
-            {errors.submit && <div className="form-error submit-error">{errors.submit}</div>}
-            
-            <button type="submit" className="submit-btn" disabled={loading}>
-              {loading ? "Processing..." : "Book Now"}
-            </button>
+            {currentStep === 1 && renderVehicleSelection()}
+            {currentStep === 2 && renderTripDetails()}
+            {currentStep === 3 && renderContactInfo()}
           </form>
-          
-          {success && bookingId && (
-            <div className="booking-success-container">
-              <div className="form-success">Booking created successfully!</div>
-              <button 
-                className="payment-btn"
-                onClick={() => navigate(`/customer/payment/${bookingId}`, {
-                  state: { bookingData: JSON.parse(localStorage.getItem('currentBooking')) }
-                })}
-              >
-                Proceed to Payment
-              </button>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

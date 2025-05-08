@@ -36,55 +36,118 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
       console.log('Token expired, attempting to refresh...');
       
+      // Store the original headers before any modifications
+      const originalHeaders = { ...originalRequest.headers };
+      
+      // Get the stored tokens
+      const storedToken = localStorage.getItem('token');
+      const storedRefreshToken = localStorage.getItem('refreshToken');
+      
       try {
-        // Try to refresh the token
-        const storedRefreshToken = localStorage.getItem('refreshToken');
-        
+        // Validate tokens
         if (!storedRefreshToken) {
-          throw new Error('No refresh token available');
+          console.warn('No refresh token available, using stored token as fallback');
+          // If we don't have a refresh token but have a token, try using that
+          if (storedToken) {
+            console.log('Using existing token as fallback');
+            // Create a new axios instance to avoid interceptor loops
+            const plainAxios = axios.create();
+            originalRequest.headers['Authorization'] = `Bearer ${storedToken}`;
+            return plainAxios(originalRequest);
+          }
+          throw new Error('No authentication tokens available');
         }
         
         console.log('Attempting to refresh token with:', storedRefreshToken.substring(0, 15) + '...');
         
-        // Use fetch directly to avoid circular dependencies with axiosInstance
-        const response = await fetch('http://localhost:8080/api/auth/refresh', {
+        // Use a direct fetch call to avoid circular dependencies with axios interceptors
+        const refreshResponse = await fetch('http://localhost:8080/api/auth/refresh', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Authorization': `Bearer ${storedRefreshToken}`
+            'Authorization': `Bearer ${storedToken}` // Use the access token, not refresh token
           },
           body: JSON.stringify({ refreshToken: storedRefreshToken }),
-          credentials: 'include',
-          mode: 'cors'
+          credentials: 'include'
         });
         
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Token refresh error response:', errorText);
-          throw new Error(`Failed to refresh token: ${response.status} ${response.statusText}`);
+        console.log('Token refresh status:', refreshResponse.status);
+        
+        if (!refreshResponse.ok) {
+          console.warn(`Refresh failed with status: ${refreshResponse.status}`);
+          // Try with existing token instead of throwing
+          if (storedToken) {
+            console.log('Refresh failed, using existing token as fallback');
+            // Create a new axios instance to avoid interceptor loops
+            const plainAxios = axios.create();
+            originalRequest.headers['Authorization'] = `Bearer ${storedToken}`;
+            return plainAxios(originalRequest);
+          }
+          throw new Error(`Refresh failed with status: ${refreshResponse.status}`);
         }
         
-        const data = await response.json();
+        // If we get here, the request was successful
+        const data = await refreshResponse.json();
         console.log('Token refresh response:', data);
         
         if (data && (data.token || data.accessToken)) {
           const newToken = data.token || data.accessToken;
           localStorage.setItem('token', newToken);
+          
           // Update axiosInstance default headers
           axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-          // Update the original request with the new token
+          
+          // Restore original headers first, then update with new token
+          originalRequest.headers = { ...originalHeaders };
           originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-          return axios(originalRequest);
+          
+          // Make sure to create a new axios instance to avoid circular interceptors
+          const plainAxios = axios.create();
+          return plainAxios(originalRequest);
         } else {
+          console.warn('Invalid token response, using existing token as fallback');
+          // Try with existing token instead of throwing
+          if (storedToken) {
+            // Create a new axios instance to avoid interceptor loops
+            const plainAxios = axios.create();
+            originalRequest.headers['Authorization'] = `Bearer ${storedToken}`;
+            return plainAxios(originalRequest);
+          }
           throw new Error('Invalid token response');
         }
       } catch (refreshError) {
         console.error('Token refresh failed:', refreshError);
-        // Clear auth data on refresh failure
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('userRole');
+        
+        // Try to use the existing token as a fallback
+        if (storedToken && !originalRequest._tokenFallbackAttempted) {
+          console.log('Trying existing token as fallback...');
+          originalRequest._tokenFallbackAttempted = true;
+          
+          // Restore original headers first, then update with existing token
+          originalRequest.headers = { ...originalHeaders };
+          originalRequest.headers['Authorization'] = `Bearer ${storedToken}`;
+          
+          // Use a new axios instance without interceptors to avoid infinite loop
+          const plainAxios = axios.create();
+          try {
+            return await plainAxios(originalRequest);
+          } catch (fallbackError) {
+            console.error('Fallback request also failed:', fallbackError);
+          }
+        }
+        
+        // If we have user data in localStorage, use it as a fallback
+        // This allows the UI to still show user info even if API calls fail
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          console.log('Using stored user data as fallback');
+          // Don't clear tokens - let the user stay logged in with cached data
+          return Promise.reject(error);
+        }
+        
+        // If all attempts fail, don't clear auth data here
+        // Let the user stay logged in with invalid tokens until they manually log out
       }
     }
     
@@ -108,45 +171,93 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axiosInstance.post('/auth/logout', null, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    } catch (error) {
-      console.error('Logout request failed:', error.response?.data || error.message);
+      const currentToken = localStorage.getItem('token');
+      if (currentToken) {
+        // Try to call the logout endpoint, but don't wait for it to complete
+        axiosInstance.post('/api/auth/logout', null, {
+          headers: {
+            Authorization: `Bearer ${currentToken}`
+          }
+        }).catch(error => {
+          console.error('Logout request failed:', error.response?.data || error.message);
+          // Ignore errors during logout
+        });
+      }
     } finally {
+      // Always clear local storage and state, even if the request fails
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       localStorage.removeItem('userRole');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('currentBooking');
+      
+      // Clear state
       setToken(null);
       setUser(null);
       setRole(null);
+      setIsAuthenticated(false);
+      
+      // Clear axios default headers
+      delete axiosInstance.defaults.headers.common['Authorization'];
     }
   };  
 
   const fetchUserProfile = async () => {
-    if (!token) return;
-
     try {
       setLoading(true);
-      const response = await axiosInstance.get('/api/users/profile', {
-        headers: { Authorization: `Bearer ${token}` }
+      
+      // Check if we have a token before making the request
+      const currentToken = localStorage.getItem('token');
+      if (!currentToken) {
+        throw new Error('No token available');
+      }
+      
+      // Try to get user profile with a direct axios call to avoid interceptor loops
+      const plainAxios = axios.create({
+        baseURL: 'http://localhost:8080',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${currentToken}`
+        },
+        withCredentials: true
       });
-
+      
+      const response = await plainAxios.get('/api/users/profile');
       const userData = response.data;
-      const userRole = userData.role?.toUpperCase();
-
+      
+      // Update user state and localStorage
       setUser(userData);
-      setRole(userRole);
       localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Set role based on user data
+      const userRole = userData.role || 'CUSTOMER';
+      setRole(userRole);
       localStorage.setItem('userRole', userRole);
+      
+      return userData;
     } catch (error) {
       console.error('Error fetching user profile:', error);
-      if (error.response?.status === 403) {
-        logout();
+      
+      // If API call fails, try to use data from localStorage as fallback
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          
+          // Set role based on stored user data
+          const userRole = userData.role || 'CUSTOMER';
+          setRole(userRole);
+          localStorage.setItem('userRole', userRole);
+          
+          return userData;
+        } catch (parseError) {
+          console.error('Error parsing stored user data:', parseError);
+        }
       }
+      
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -157,34 +268,28 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     
     try {
-      console.log('Attempting login for:', formData);
-      
-      // Try both endpoints with a fallback mechanism
       let response;
+      
       try {
-        // First try the /auth/login endpoint (without /api prefix)
-        response = await axios.post('http://localhost:8080/auth/login', {
-          email: formData.email,
-          password: formData.password
-        }, {
+        // First try the /login endpoint
+        response = await axiosInstance.post('/login', formData);
+      } catch (initialError) {
+        console.log('Initial login attempt failed, trying /api/auth/login endpoint');
+        
+        // If that fails, try the /api/auth/login endpoint with a direct axios call
+        // to avoid interceptors during login
+        const plainAxios = axios.create({
+          baseURL: 'http://localhost:8080',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           },
           withCredentials: true
         });
-      } catch (firstError) {
-        console.log('First login attempt failed, trying alternate endpoint:', firstError.message);
-        // If that fails, try the /api/auth/login endpoint
-        response = await axios.post('http://localhost:8080/api/auth/login', {
+        
+        response = await plainAxios.post('/api/auth/login', {
           email: formData.email,
           password: formData.password
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          withCredentials: true
         });
       }
       
@@ -234,32 +339,33 @@ export const AuthProvider = ({ children }) => {
   const refreshToken = async () => {
     try {
       const storedRefreshToken = localStorage.getItem('refreshToken');
+      const storedToken = localStorage.getItem('token');
       
       if (!storedRefreshToken) {
-        throw new Error('No refresh token available');
+        console.warn('No refresh token available, skipping refresh');
+        return null;
       }
       
       console.log('Attempting to refresh token with:', storedRefreshToken.substring(0, 15) + '...');
       
-      // Use fetch directly to avoid circular dependencies with axiosInstance
-      const response = await fetch('http://localhost:8080/api/auth/refresh', {
+      // Use fetch instead of axios to avoid interceptor loops
+      const refreshResponse = await fetch('http://localhost:8080/api/auth/refresh', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': `Bearer ${storedRefreshToken}`
+          'Authorization': `Bearer ${storedToken}` // Use the access token, not refresh token
         },
-        credentials: 'include',
-        mode: 'cors'
+        body: JSON.stringify({ refreshToken: storedRefreshToken }),
+        credentials: 'include'
       });
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Token refresh error response:', errorText);
-        throw new Error(`Failed to refresh token: ${response.status} ${response.statusText}`);
+      if (!refreshResponse.ok) {
+        throw new Error(`Refresh failed with status: ${refreshResponse.status}`);
       }
       
-      const data = await response.json();
+      // If we get here, the request was successful
+      const data = await refreshResponse.json();
       console.log('Token refresh response:', data);
       
       if (data && (data.token || data.accessToken)) {
@@ -270,12 +376,13 @@ export const AuthProvider = ({ children }) => {
         axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
         return newToken;
       } else {
-        throw new Error('Invalid token response');
+        console.warn('Invalid token response, but not forcing logout');
+        return null;
       }
     } catch (error) {
       console.error('Token refresh error:', error);
-      logout(); // Force logout on refresh failure
-      throw error;
+      // Don't force logout on refresh failure, let the user continue with existing token
+      return null;
     }
   };
   

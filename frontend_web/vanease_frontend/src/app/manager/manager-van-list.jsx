@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ManagerVanDelete from "./manager-van-delete";
+import { axiosInstance } from "../../context/AuthContext";
 import "./manager-van-list.css";
 
 const getImageUrl = (vehicle) => {
@@ -14,30 +15,59 @@ const ManagerVanList = () => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [statusUpdating, setStatusUpdating] = useState(null);
   const navigate = useNavigate();
 
+  const fetchVehicles = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/vehicles/all", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Failed to fetch vehicles");
+      const data = await res.json();
+      setVehicles(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchVehicles = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const token = localStorage.getItem("token");
-        const res = await fetch("/api/vehicles/all", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!res.ok) throw new Error("Failed to fetch vehicles");
-        const data = await res.json();
-        setVehicles(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchVehicles();
   }, []);
+  
+  const toggleVehicleAvailability = async (vehicleId, newAvailability) => {
+    setStatusUpdating(vehicleId);
+    try {
+      const response = await axiosInstance.patch(
+        `/api/vehicles/${vehicleId}/availability?available=${newAvailability}`,
+        {}, // Empty body for PATCH request
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+      
+      if (response.status === 200) {
+        // Update the local state with the updated vehicle
+        setVehicles(vehicles.map(vehicle => 
+          vehicle.id === vehicleId ? response.data : vehicle
+        ));
+      }
+    } catch (err) {
+      console.error("Error updating vehicle availability:", err);
+      alert("Failed to update vehicle availability. Please try again.");
+    } finally {
+      setStatusUpdating(null);
+    }
+  };
 
   return (
     <div className="manager-van-list-container">
@@ -67,7 +97,29 @@ const ManagerVanList = () => {
               <div className="vehicle-capacity"><span>Capacity:</span> {vehicle.capacity}</div>
               <div className="vehicle-fuel"><span>Fuel:</span> {vehicle.fuelType}</div>
               <div className="vehicle-trans"><span>Transmission:</span> {vehicle.transmission}</div>
-              <div className="vehicle-status"><span>Status:</span> {vehicle.status}</div>
+              <div className="vehicle-status">
+                <span>Status:</span> 
+                <span className={`status-badge status-${vehicle.status?.toLowerCase()}`}>
+                  {vehicle.status}
+                </span>
+              </div>
+              <div className="vehicle-availability">
+                <span>Availability:</span>
+                <div className="availability-toggle">
+                  <label className="switch">
+                    <input 
+                      type="checkbox" 
+                      checked={vehicle.availability} 
+                      onChange={() => toggleVehicleAvailability(vehicle.id, !vehicle.availability)}
+                      disabled={statusUpdating === vehicle.id}
+                    />
+                    <span className="slider round"></span>
+                  </label>
+                  <span className="availability-label">
+                    {vehicle.availability ? "Available" : "Unavailable"}
+                  </span>
+                </div>
+              </div>
               {vehicle.description && (
                 <div className="vehicle-desc">{vehicle.description}</div>
               )}

@@ -87,8 +87,9 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/vehicles/**").hasRole("MANAGER")
 
                         // User management
-                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasRole("MANAGER")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/api/users/profile").hasAnyRole("CUSTOMER", "MANAGER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("MANAGER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("CUSTOMER", "MANAGER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("MANAGER")
 
                         // Booking management - make create endpoints public for testing
@@ -96,6 +97,7 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/bookings/create").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/bookings/user/upcoming").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/user/past").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/user/{id}").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/user/**").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/**").hasAnyRole("MANAGER", "ADMIN", "CUSTOMER")
                         .requestMatchers(HttpMethod.PUT, "/api/bookings/**").hasAnyRole("MANAGER", "ADMIN", "CUSTOMER")

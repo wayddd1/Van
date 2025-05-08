@@ -26,7 +26,16 @@ public class CorsConfig {
         config.addAllowedHeader("*");
         
         // Expose these headers to the client
-        config.setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
+        config.setExposedHeaders(Arrays.asList(
+            "Access-Control-Allow-Origin", 
+            "Access-Control-Allow-Credentials",
+            "Access-Control-Allow-Headers",
+            "Access-Control-Allow-Methods",
+            "Access-Control-Expose-Headers",
+            "Authorization",
+            "Content-Type",
+            "X-Requested-With"
+        ));
         
         // Allow credentials (cookies, authorization headers, etc.)
         config.setAllowCredentials(true);

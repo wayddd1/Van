@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; // Import useAuth from AuthContext
+import { axiosInstance } from "../context/AuthContext";
 import "../styles/navbar.css";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, token, logout } = useAuth(); // Get user info, token, and logout function from context
+  const { user, token, logout, fetchUserProfile } = useAuth(); // Get user info, token, and logout function from context
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -22,9 +23,24 @@ export default function Navbar() {
   // Get user role from localStorage if not available in context
   const userRole = user?.role || localStorageUser?.role;
   
+  // Verify authentication on mount and when token changes
+  useEffect(() => {
+    const verifyAuth = async () => {
+      if (isAuthenticated && (!user || !user.role)) {
+        try {
+          await fetchUserProfile();
+        } catch (error) {
+          console.error('Error fetching user profile in Navbar:', error);
+        }
+      }
+    };
+    
+    verifyAuth();
+  }, [isAuthenticated, token, user, fetchUserProfile]);
+  
   // Debug authentication state
   useEffect(() => {
-    console.log('Auth state:', { 
+    console.log('Navbar auth state:', { 
       contextToken: !!token, 
       localToken: !!localStorageToken,
       isAuthenticated,
@@ -45,11 +61,16 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout(); // Call the logout function from context
+    
     // Also clear localStorage directly as a fallback
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('refreshToken');
-    navigate("/"); // Redirect to the homepage or login page
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('currentBooking');
+    
+    // Redirect to login page
+    navigate("/login");
   };
 
   return (
@@ -79,9 +100,29 @@ export default function Navbar() {
           <div className="navbar-auth">
             {isAuthenticated ? (
               <>
-                <Link to="/profile" className="navbar-profile">
+                <Link 
+                  to="/customer/profile" 
+                  className="navbar-profile"
+                  onClick={(e) => {
+                    // Prevent default navigation
+                    e.preventDefault();
+                    
+                    // Check if we have a valid token before navigating
+                    if (token || localStorageToken) {
+                      navigate('/customer/profile');
+                    } else {
+                      // If no token, try to fetch the profile first
+                      fetchUserProfile()
+                        .then(() => navigate('/customer/profile'))
+                        .catch(() => {
+                          console.log('Authentication failed, redirecting to login');
+                          navigate('/login', { state: { returnTo: '/customer/profile' } });
+                        });
+                    }
+                  }}
+                >
                   <span className="profile-icon">👤</span>
-                  <span className="profile-text">{user?.name || localStorageUser?.name || 'Profile'}</span>
+                  <span className="profile-text">{user?.firstName || localStorageUser?.firstName || 'Profile'}</span>
                 </Link>
                 <button onClick={handleLogout} className="navbar-button logout-button">
                   Logout

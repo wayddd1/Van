@@ -140,6 +140,25 @@ public class VehicleController {
             return buildErrorResponse("Error retrieving vehicle: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    
+    @PatchMapping("/{id}/availability")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<?> toggleVehicleAvailability(
+            @PathVariable Long id,
+            @RequestParam Boolean available,
+            @RequestParam(required = false) String status
+    ) {
+        try {
+            Vehicle vehicle = vehicleService.toggleVehicleAvailability(id, available, status);
+            return ResponseEntity.ok(vehicle);
+        } catch (EntityNotFoundException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException e) {
+            return buildErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse("Error updating vehicle availability: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     // Helper: error response formatter
     private ResponseEntity<Map<String, String>> buildErrorResponse(String message, HttpStatus status) {

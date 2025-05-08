@@ -20,8 +20,17 @@ export default function ManagerNavbar() {
   const toggleMenu = () => setIsMenuOpen((prev) => !prev)
 
   const handleLogout = () => {
-    logout()  // Use the logout function from AuthContext
-    navigate("/login")  // Redirect to login page after logging out
+    logout();  // Use the logout function from AuthContext
+  
+    // Also clear localStorage directly as a fallback
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('currentBooking');
+  
+    // Redirect to login page
+    navigate("/login");
   }
 
   return (
@@ -60,6 +69,12 @@ export default function ManagerNavbar() {
               className={`manager-navbar-link ${location.pathname === "/manager/bookings" ? "active" : ""}`}
             >
               Booking Management
+            </Link>
+            <Link
+              to="/manager/users"
+              className={`manager-navbar-link ${location.pathname === "/manager/users" ? "active" : ""}`}
+            >
+              User Management
             </Link>
             <Link
               to="#"

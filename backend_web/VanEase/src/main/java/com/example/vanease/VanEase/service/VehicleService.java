@@ -127,4 +127,32 @@ public class VehicleService {
     public List<Vehicle> getAvailableVehicles() {
         return vehicleRepository.findByStatusAndAvailability(VehicleStatus.AVAILABLE, true);
     }
+    
+    public Vehicle toggleVehicleAvailability(Long id, Boolean available, String statusStr) {
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Vehicle not found with ID: " + id));
+        
+        vehicle.setAvailability(available);
+        
+        // If status is provided, update it as well
+        if (statusStr != null && !statusStr.isEmpty()) {
+            try {
+                VehicleStatus status = VehicleStatus.valueOf(statusStr.toUpperCase());
+                vehicle.setStatus(status);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid vehicle status: " + statusStr);
+            }
+        } else {
+            // If no status provided but availability is changed to false, set status to UNAVAILABLE
+            if (!available && vehicle.getStatus() == VehicleStatus.AVAILABLE) {
+                vehicle.setStatus(VehicleStatus.UNAVAILABLE);
+            }
+            // If availability is changed to true, set status to AVAILABLE
+            else if (available && vehicle.getStatus() == VehicleStatus.UNAVAILABLE) {
+                vehicle.setStatus(VehicleStatus.AVAILABLE);
+            }
+        }
+        
+        return vehicleRepository.save(vehicle);
+    }
 }

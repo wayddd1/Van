@@ -104,11 +104,11 @@
   font-weight: 600;
   font-size: 1rem;
 }
-.vehicle-plate, .vehicle-rate, .vehicle-capacity, .vehicle-fuel, .vehicle-trans, .vehicle-status {
+.vehicle-plate, .vehicle-rate, .vehicle-capacity, .vehicle-fuel, .vehicle-trans, .vehicle-status, .vehicle-availability {
   font-size: 0.98rem;
   color: #34495e;
 }
-.vehicle-plate span, .vehicle-rate span, .vehicle-capacity span, .vehicle-fuel span, .vehicle-trans span, .vehicle-status span {
+.vehicle-plate span, .vehicle-rate span, .vehicle-capacity span, .vehicle-fuel span, .vehicle-trans span, .vehicle-status span, .vehicle-availability span {
   color: #7b8ca7;
   font-weight: 500;
   margin-right: 4px;
@@ -117,8 +117,111 @@
   color: #16a085;
 }
 .vehicle-status {
-  color: #e67e22;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: white;
+}
+
+.status-available {
+  background-color: #22c55e;
+}
+
+.status-unavailable {
+  background-color: #ef4444;
+}
+
+.status-maintenance {
+  background-color: #f59e0b;
+}
+
+.status-reserved {
+  background-color: #8b5cf6;
+}
+.vehicle-availability {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.availability-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 4px;
+}
+
+.availability-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #34495e;
+}
+
+/* Toggle Switch Styles */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #3e8ed0;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #3e8ed0;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
 .vehicle-desc {
   font-size: 0.95rem;
   color: #444;
