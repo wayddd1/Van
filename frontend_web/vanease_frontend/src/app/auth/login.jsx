@@ -33,24 +33,30 @@ const Login = () => {
   } = useAuth();
 
   useEffect(() => {
-    if (isAuthenticated && role) {
-      console.log('Authentication state changed - User is authenticated with role:', role);
+    // Check if user is authenticated
+    if (isAuthenticated) {
+      // Get role from context or localStorage as fallback
+      const userRole = role || localStorage.getItem('userRole');
+      console.log('Authentication state changed - User is authenticated with role:', userRole);
       
       // If there's a return path, navigate there instead of the dashboard
       if (returnTo) {
         console.log('Redirecting to return path:', returnTo);
         navigate(returnTo, { state: { bookingData } });
+        return;
+      }
+      
+      // Default navigation based on role
+      if (userRole === 'CUSTOMER' || userRole === 'ROLE_CUSTOMER') {
+        console.log('Redirecting to customer dashboard');
+        navigate('/customer/dashboard');
+      } else if (userRole === 'MANAGER' || userRole === 'ROLE_MANAGER') {
+        console.log('Redirecting to manager dashboard');
+        navigate('/manager/manager-dashboard');
       } else {
-        // Default navigation based on role
-        if (role === 'CUSTOMER') {
-          console.log('Redirecting to customer dashboard');
-          navigate('/customer/dashboard');
-        } else if (role === 'MANAGER') {
-          console.log('Redirecting to manager dashboard');
-          navigate('/manager/manager-dashboard');
-        } else {
-          console.log('Unknown role:', role);
-        }
+        console.log('Unknown role:', userRole);
+        // Default to customer dashboard if role is unknown
+        navigate('/customer/dashboard');
       }
     }
   }, [isAuthenticated, role, navigate, returnTo, bookingData]);
@@ -94,17 +100,27 @@ const Login = () => {
         if (returnTo) {
           console.log('Manually navigating to return path:', returnTo);
           navigate(returnTo, { state: { bookingData } });
-        } else {
-          const userRole = result?.user?.role || localStorage.getItem('userRole') || 'CUSTOMER';
-          console.log('Manually navigating based on role:', userRole);
-          
-          if (userRole === 'CUSTOMER') {
-            navigate('/customer/dashboard');
-          } else if (userRole === 'MANAGER') {
-            navigate('/manager/manager-dashboard');
-          }
+          return;
         }
-      }, 500); // Short delay to allow state to update
+        
+        // Get user role from multiple possible sources
+        const userRole = result?.user?.role || 
+                        localStorage.getItem('userRole') || 
+                        'CUSTOMER';
+                        
+        console.log('Manually navigating based on role:', userRole);
+        
+        // Handle different role formats (with or without ROLE_ prefix)
+        if (userRole === 'CUSTOMER' || userRole === 'ROLE_CUSTOMER') {
+          navigate('/customer/dashboard');
+        } else if (userRole === 'MANAGER' || userRole === 'ROLE_MANAGER') {
+          // Force direct navigation to manager dashboard
+          window.location.href = '/manager/manager-dashboard';
+        } else {
+          // Default fallback
+          navigate('/customer/dashboard');
+        }
+      }, 1000); // Longer delay to ensure state is updated
     } catch (err) {
       console.error('Login error:', err);
       setLocalError(err.message || 'Login failed. Please try again.');

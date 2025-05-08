@@ -7,6 +7,7 @@ import ManagerDashboard from './app/manager/manager-dashboard';
 import ManagerVanAdd from './app/manager/manager-van-add';
 import ManagerVanList from './app/manager/manager-van-list';
 import ManagerVanUpdate from './app/manager/manager-van-update';
+import ManagerBookingManagement from './app/manager/manager-booking-management';
 import CustomerDashboard from './app/customer/customer-dashboard';
 import CustomerVanList from './app/customer/customer-van-list';
 import CustomerVanBooking from './app/customer/customer-van-booking';
@@ -51,6 +52,7 @@ const AppContent = () => {
         <Route path="/manager/van-list" element={<ProtectedRoute allowedRoles={['MANAGER']}><ManagerVanList /></ProtectedRoute>} />
         <Route path="/manager/van-add" element={<ProtectedRoute allowedRoles={['MANAGER']}><ManagerVanAdd /></ProtectedRoute>} />
         <Route path="/manager/van-update/:id" element={<ProtectedRoute allowedRoles={['MANAGER']}><ManagerVanUpdate /></ProtectedRoute>} />
+        <Route path="/manager/bookings" element={<ProtectedRoute allowedRoles={['MANAGER']}><ManagerBookingManagement /></ProtectedRoute>} />
       </Routes>
     </>
   );

@@ -10,6 +10,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
   useEffect(() => {
     const validateAuth = async () => {
+      // Check if we need to fetch the user profile
       if (token && !role && !user?.role) {
         try {
           await fetchUserProfile();
@@ -26,15 +27,26 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return <LoadingSpinner />;
   }
 
+  // If no token, redirect to login
   if (!token) {
+    console.log('No token found, redirecting to login');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  const userRole = role || user?.role;
-
-  if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
-    console.log(`Access denied: ${userRole} not in ${allowedRoles.join(', ')}`);
-    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+  // Get user role from multiple sources
+  const userRole = role || user?.role || localStorage.getItem('userRole');
+  console.log('ProtectedRoute - User role:', userRole);
+  
+  // Check if user has permission to access this route
+  if (allowedRoles && userRole) {
+    // Check for both formats of roles (with or without ROLE_ prefix)
+    const normalizedUserRole = userRole.replace('ROLE_', '');
+    const normalizedAllowedRoles = allowedRoles.map(r => r.replace('ROLE_', ''));
+    
+    if (!normalizedAllowedRoles.includes(normalizedUserRole)) {
+      console.log(`Access denied: ${userRole} not in ${allowedRoles.join(', ')}`);
+      return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+    }
   }
 
   return children;

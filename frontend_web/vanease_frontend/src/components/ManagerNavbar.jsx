@@ -56,6 +56,12 @@ export default function ManagerNavbar() {
               Manage Vehicles
             </Link>
             <Link
+              to="/manager/bookings"
+              className={`manager-navbar-link ${location.pathname === "/manager/bookings" ? "active" : ""}`}
+            >
+              Booking Management
+            </Link>
+            <Link
               to="#"
               className="manager-navbar-link"
               onClick={e => { e.preventDefault(); alert('Reports feature coming soon!'); }}

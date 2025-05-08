@@ -5,28 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5bda11a3-5a14-4b6c-a819-0ef630706e94" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/config/WebSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/config/WebSecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/controller/VehicleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/controller/VehicleController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/dto/VehiclePictureResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/dto/VehiclePictureResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/dto/VehicleRequestDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/dto/VehicleRequestDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/model/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/model/Vehicle.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/model/Vehicle.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/model/VehicleFuelType.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/model/VehicleFuelType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/repository/VehicleRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/repository/VehicleRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/security/filter/JwtAuthFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/security/filter/JwtAuthFilter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/security/service/JwtService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/security/service/JwtService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/security/util/JwtUtil.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/service/VehicleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/service/VehicleService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/App.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-dashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/vehicle/manager-van-add.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/vehicle/manager-van-add.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/vehicle/manager-van-detail.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/vehicle/manager-van-list.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/vehicle/manager-van-list.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/components/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/components/Navbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/auth/login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/auth/login.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/components/ManagerNavbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/components/ManagerNavbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/components/ProtectedRoute.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/components/ProtectedRoute.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
