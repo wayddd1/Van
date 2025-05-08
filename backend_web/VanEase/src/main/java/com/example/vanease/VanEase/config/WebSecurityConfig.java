@@ -95,6 +95,7 @@ public class WebSecurityConfig {
                         // Booking management - make create endpoints public for testing
                         .requestMatchers(HttpMethod.POST, "/api/bookings").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/bookings/create").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/bookings").hasAnyRole("MANAGER", "ADMIN") // Explicitly allow MANAGER to access all bookings
                         .requestMatchers(HttpMethod.GET, "/api/bookings/user/upcoming").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/user/past").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/user/{id}").hasRole("CUSTOMER")
