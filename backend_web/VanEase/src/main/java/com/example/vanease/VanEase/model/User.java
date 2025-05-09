@@ -50,6 +50,9 @@ public class User implements UserDetails, Serializable {
     @Builder.Default
     @Column(nullable = false)
     private boolean enabled = true;
+    
+    @Column(name = "created_at")
+    private java.util.Date createdAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

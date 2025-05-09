@@ -31,6 +31,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setPhone(dto.getPhoneNumber());
         user.setRole(Role.CUSTOMER);  // Assuming Role is an Enum like "CUSTOMER"
+        user.setCreatedAt(new java.util.Date()); // Set current date as creation date
 
         User saved = userRepository.save(user);
         return mapToResponseDTO(saved);
@@ -72,6 +73,8 @@ public class UserService {
         dto.setEmail(user.getEmail());
         dto.setPhoneNumber(user.getPhone());
         dto.setRole(user.getRole().name());
+        dto.setStatus(user.isEnabled() ? "ACTIVE" : "INACTIVE");
+        dto.setCreatedAt(user.getCreatedAt());
         return dto;
     }
 }

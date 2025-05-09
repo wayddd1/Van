@@ -25,11 +25,19 @@ const CustomerDashboard = () => {
     fetchVehicles();
   }, []);
 
-  const handleBook = (vehicleId) => {
+  const handleBook = (vehicle) => {
     if (!isLoggedIn) {
       navigate("/register");
     } else {
-      navigate(`/customer/book/${vehicleId}`);
+      // Navigate to booking page with vehicle details in state
+      navigate('/customer/booking', {
+        state: {
+          vehicleId: vehicle.id,
+          vehicleName: `${vehicle.brand} ${vehicle.model}`,
+          imageUrl: vehicle.imageUrl || `/api/vehicles/${vehicle.id}/image`,
+          ratePerDay: vehicle.ratePerDay
+        }
+      });
     }
   };
 
@@ -65,7 +73,7 @@ const CustomerDashboard = () => {
                   <div className="vehicle-rate"><span>Rate/Day:</span> ₱{vehicle.ratePerDay}</div>
                   <div className="vehicle-capacity"><span>Capacity:</span> {vehicle.capacity}</div>
                   <div className="vehicle-status"><span>Status:</span> {vehicle.status}</div>
-                  <button className="book-btn" onClick={() => handleBook(vehicle.id)} disabled={vehicle.status !== "AVAILABLE"}>
+                  <button className="book-btn" onClick={() => handleBook(vehicle)} disabled={vehicle.status !== "AVAILABLE"}>
                     {vehicle.status === "AVAILABLE" ? "Book Now" : "Not Available"}
                   </button>
                 </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../../context/AuthContext";
+import { toast } from "react-toastify";
 import "./manager-user-management.css";
 
 const ManagerUserManagement = () => {
@@ -14,19 +15,32 @@ const ManagerUserManagement = () => {
   // Get token from localStorage
   const token = localStorage.getItem('token');
 
+  // Mock data in case the API is not available
+  const mockUsers = [
+    { id: 1, name: "John Doe", email: "john@example.com", phoneNumber: "123-456-7890", role: "CUSTOMER", status: "ACTIVE", createdAt: "2025-01-15" },
+    { id: 2, name: "Jane Smith", email: "jane@example.com", phoneNumber: "234-567-8901", role: "CUSTOMER", status: "ACTIVE", createdAt: "2025-02-20" },
+    { id: 3, name: "Bob Johnson", email: "bob@example.com", phoneNumber: "345-678-9012", role: "MANAGER", status: "ACTIVE", createdAt: "2025-01-10" },
+    { id: 4, name: "Alice Brown", email: "alice@example.com", phoneNumber: "456-789-0123", role: "CUSTOMER", status: "INACTIVE", createdAt: "2025-03-05" },
+    { id: 5, name: "Charlie Wilson", email: "charlie@example.com", phoneNumber: "567-890-1234", role: "CUSTOMER", status: "ACTIVE", createdAt: "2025-02-28" },
+  ];
+
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get("/api/users/all", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        // Make sure we have a token
+        if (!token) {
+          throw new Error("Authentication token is missing");
+        }
+
+        const response = await axiosInstance.get("/api/users/all");
         console.log("Fetched users:", response.data);
         setUsers(response.data);
         setError(null);
       } catch (err) {
         console.error("Error fetching users:", err);
         setError("Failed to load users. Please try again later.");
+        toast.error("Failed to load users. Using sample data instead.");
         // If we can't fetch real data, use mock data for demo purposes
         setUsers(mockUsers);
       } finally {
@@ -42,7 +56,7 @@ const ManagerUserManagement = () => {
     const matchesSearch = 
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.phone?.toLowerCase().includes(searchTerm.toLowerCase());
+      (user.phoneNumber || user.phone)?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesRole = filterRole === "ALL" || user.role === filterRole;
     
@@ -58,20 +72,14 @@ const ManagerUserManagement = () => {
       setUsers(users.map(user => 
         user.id === userId ? { ...user, status: newStatus } : user
       ));
+      toast.success(`User status updated to ${newStatus}`);
     } catch (err) {
       console.error("Error updating user status:", err);
-      alert("Failed to update user status. Please try again.");
+      toast.error("Failed to update user status. Please try again.");
     }
   };
 
-  // Mock data in case the API is not available
-  const mockUsers = [
-    { id: 1, name: "John Doe", email: "john@example.com", phone: "123-456-7890", role: "CUSTOMER", status: "ACTIVE", createdAt: "2025-01-15" },
-    { id: 2, name: "Jane Smith", email: "jane@example.com", phone: "234-567-8901", role: "CUSTOMER", status: "ACTIVE", createdAt: "2025-02-20" },
-    { id: 3, name: "Bob Johnson", email: "bob@example.com", phone: "345-678-9012", role: "MANAGER", status: "ACTIVE", createdAt: "2025-01-10" },
-    { id: 4, name: "Alice Brown", email: "alice@example.com", phone: "456-789-0123", role: "CUSTOMER", status: "INACTIVE", createdAt: "2025-03-05" },
-    { id: 5, name: "Charlie Wilson", email: "charlie@example.com", phone: "567-890-1234", role: "CUSTOMER", status: "ACTIVE", createdAt: "2025-02-28" },
-  ];
+
 
   return (
     <div className="user-management-container">
@@ -160,7 +168,7 @@ const ManagerUserManagement = () => {
                       <td>{user.id}</td>
                       <td>{user.name}</td>
                       <td>{user.email}</td>
-                      <td>{user.phone || "N/A"}</td>
+                      <td>{user.phoneNumber || user.phone || "N/A"}</td>
                       <td>
                         <span className={`role-badge role-${user.role?.toLowerCase()}`}>
                           {user.role}

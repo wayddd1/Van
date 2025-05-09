@@ -5,8 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5bda11a3-5a14-4b6c-a819-0ef630706e94" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/config/WebSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/config/WebSecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-booking-management.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-booking-management.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/dto/UserResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/dto/UserResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/model/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-booking-history.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-booking-history.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-van-booking.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-van-booking.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-user-management.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-user-management.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,21 +37,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:repackage].executor": "Run",
-    "Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:run].executor": "Run",
-    "Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:start].executor": "Run",
-    "Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:stop].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "integration",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.0"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:repackage].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:run].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:start].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:stop].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;integration&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;
   }
-}]]></component>
+}</component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="5bda11a3-5a14-4b6c-a819-0ef630706e94" name="Changes" comment="" />

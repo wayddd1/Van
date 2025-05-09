@@ -35,10 +35,30 @@ const CustomerVanBooking = () => {
   const preSelectedVehicleImage = state.imageUrl || "";
   const preSelectedRate = state.ratePerDay || "";
   
-  // Form state - initialize with pre-selected vehicle if available
-  const [form, setForm] = useState({
-    ...initialState,
-    vehicleId: preSelectedVehicleId
+  // Form state - initialize with saved data from localStorage or pre-selected vehicle
+  const [form, setForm] = useState(() => {
+    // Try to get saved form data from localStorage
+    const savedForm = localStorage.getItem('bookingFormData');
+    if (savedForm) {
+      try {
+        const parsedForm = JSON.parse(savedForm);
+        // If we have a pre-selected vehicle from the current navigation, prioritize it
+        if (preSelectedVehicleId) {
+          return {
+            ...parsedForm,
+            vehicleId: preSelectedVehicleId
+          };
+        }
+        return parsedForm;
+      } catch (e) {
+        console.error('Error parsing saved form data:', e);
+      }
+    }
+    // Fall back to initial state with pre-selected vehicle if available
+    return {
+      ...initialState,
+      vehicleId: preSelectedVehicleId
+    };
   });
   const [calculatedPrice, setCalculatedPrice] = useState("");
   const [errors, setErrors] = useState({});
@@ -68,6 +88,22 @@ const CustomerVanBooking = () => {
         // Fetch available vehicles if we have a token
         if (token) {
           await fetchAvailableVehicles(token);
+          
+          // Check if we have a saved step in localStorage
+          const savedStep = localStorage.getItem('bookingCurrentStep');
+          
+          // If we have a pre-selected vehicle from the dashboard, auto-advance to step 2
+          if (preSelectedVehicleId && !savedStep) {
+            // Wait a short time to ensure vehicle data is loaded
+            setTimeout(() => {
+              const newStep = 2; // Move to trip details step
+              setCurrentStep(newStep);
+              localStorage.setItem('bookingCurrentStep', newStep);
+            }, 500);
+          } else if (savedStep) {
+            // Restore the saved step
+            setCurrentStep(parseInt(savedStep));
+          }
         }
       } catch (error) {
         console.error('Error during initialization:', error);
@@ -76,7 +112,7 @@ const CustomerVanBooking = () => {
     };
     
     checkAuthAndFetchVehicles();
-  }, [navigate]);
+  }, [navigate, preSelectedVehicleId]);
 
   // Function to fetch available vehicles from backend
   const fetchAvailableVehicles = async (token) => {
@@ -108,12 +144,40 @@ const CustomerVanBooking = () => {
       
       // If we have a pre-selected vehicle, verify it's still available
       if (preSelectedVehicleId) {
+        console.log('Pre-selected vehicle ID:', preSelectedVehicleId);
         const vehicle = processedVehicles.find(v => v.id === parseInt(preSelectedVehicleId));
         if (!vehicle) {
           toast.warning('The selected vehicle is no longer available. Please choose another.');
-          setForm(prev => ({ ...prev, vehicleId: '' }));
+          const updatedForm = { ...form, vehicleId: '' };
+          setForm(updatedForm);
+          // Save to localStorage
+          localStorage.setItem('bookingFormData', JSON.stringify(updatedForm));
         } else {
+          console.log('Found pre-selected vehicle:', vehicle);
           setSelectedVehicle(vehicle);
+          // Update form with vehicle ID to ensure it's selected in the dropdown
+          const updatedForm = { ...form, vehicleId: vehicle.id.toString() };
+          setForm(updatedForm);
+          // Save to localStorage
+          localStorage.setItem('bookingFormData', JSON.stringify(updatedForm));
+          // Calculate price if dates are already set
+          if (form.startDate && form.endDate) {
+            calculateTotalPrice();
+          }
+          toast.success(`${vehicle.brand} ${vehicle.model} has been pre-selected for you.`);
+        }
+      } else {
+        // Check if we have a saved vehicle in form data
+        const savedVehicleId = form.vehicleId;
+        if (savedVehicleId) {
+          const vehicle = processedVehicles.find(v => v.id.toString() === savedVehicleId);
+          if (vehicle) {
+            setSelectedVehicle(vehicle);
+            // Calculate price if dates are already set
+            if (form.startDate && form.endDate) {
+              calculateTotalPrice();
+            }
+          }
         }
       }
     } catch (error) {
@@ -374,146 +438,135 @@ const CustomerVanBooking = () => {
   // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
     
-    // Clear specific error when field is changed
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
+    const updatedForm = {
+      ...form,
+      [name]: value
+    };
     
-    // If vehicle changes, update selected vehicle
+    setForm(updatedForm);
+    
+    // Save form data to localStorage
+    localStorage.setItem('bookingFormData', JSON.stringify(updatedForm));
+    
+    // If vehicle selection changes, update selectedVehicle
     if (name === 'vehicleId' && value) {
-      const vehicle = vehicles.find(v => v.id === parseInt(value));
+      const vehicle = vehicles.find(v => v.id.toString() === value);
       setSelectedVehicle(vehicle || null);
+      
+      // If dates are already selected, recalculate price
+      if (form.startDate && form.endDate) {
+        calculateTotalPrice();
+      }
+      
+      console.log(`Selected vehicle: ${vehicle?.brand} ${vehicle?.model}`);
     }
     
-    // Recalculate price when relevant fields change
-    if (['vehicleId', 'startDate', 'endDate'].includes(name)) {
-      setTimeout(calculateTotalPrice, 0);
+    // Clear validation errors for the changed field
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
     }
   };
-  
+
   // Handle next step in multi-step form
   const handleNextStep = () => {
     const isValid = validate(currentStep);
-    
     if (isValid) {
-      setCurrentStep(prev => Math.min(prev + 1, 4));
+      // Save current step to localStorage
+      localStorage.setItem('bookingCurrentStep', currentStep + 1);
+      setCurrentStep(currentStep + 1);
       window.scrollTo(0, 0);
     }
   };
-  
+
   // Handle previous step in multi-step form
   const handlePrevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    const newStep = currentStep - 1;
+    // Save current step to localStorage
+    localStorage.setItem('bookingCurrentStep', newStep);
+    setCurrentStep(newStep);
     window.scrollTo(0, 0);
   };
-  
+
   // Submit booking to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate all fields
-    const isValid = validate(0);
+    // Validate all form fields
+    const isValid = validate(currentStep);
     if (!isValid) {
-      toast.error('Please fix the errors before submitting');
-      return;
-    }
-    
-    // Check if vehicle is available for selected dates
-    if (!dateAvailability.available) {
-      toast.error(dateAvailability.message);
       return;
     }
     
     setLoading(true);
     
     try {
-      const token = localStorage.getItem('token');
-      
-      // Calculate total price
-      const totalPrice = calculateTotalPrice();
-      
-      // Prepare booking data according to BookingRequestDTO structure
+      // Prepare booking data
       const bookingData = {
         vehicleId: parseInt(form.vehicleId),
         startDate: form.startDate,
         endDate: form.endDate,
         pickupLocation: form.pickupLocation,
         dropoffLocation: form.dropoffLocation,
-        totalPrice: totalPrice || null
+        customerName: form.fullName,
+        customerEmail: form.email,
+        customerPhone: form.phone,
+        specialRequests: form.specialRequests || '',
+        totalDays: calculateDays(form.startDate, form.endDate),
+        totalPrice: parseFloat(calculatedPrice)
       };
       
-      // Add additional fields that will be stored in the booking metadata
-      const bookingMetadata = {
-        pickupTime: form.pickupTime,
-        dropoffTime: form.dropoffTime,
-        numberOfPassengers: form.numberOfPassengers ? parseInt(form.numberOfPassengers) : null,
-        specialRequests: form.specialRequests,
-        customerDetails: {
-          fullName: form.fullName,
-          email: form.email,
-          phone: form.phone
-        }
-      };
+      console.log('Submitting booking data:', bookingData);
       
-      // Combine data for the frontend, but only send the required fields to the backend
-      const fullBookingData = { ...bookingData, ...bookingMetadata };
-      
-      console.log('Submitting booking:', bookingData);
-      
-      // Submit booking to backend
-      const response = await axiosInstance.post('/api/bookings/create', bookingData, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Send booking request to backend
+      const response = await axiosInstance.post('/api/bookings/create', bookingData);
       
       console.log('Booking response:', response.data);
       
-      // Store complete booking data in localStorage for payment page
-      const booking = { ...response.data, ...bookingMetadata };
-      localStorage.setItem('currentBooking', JSON.stringify(booking));
+      // Store booking data for payment page
+      localStorage.setItem('currentBooking', JSON.stringify({
+        ...bookingData,
+        bookingId: response.data.bookingId,
+        vehicle: selectedVehicle
+      }));
       
-      // Update state
-      setBookingId(booking.id);
+      // Set success state and booking ID
       setSuccess(true);
-      setLoading(false);
-      
-      // Show success message
+      setBookingId(response.data.bookingId);
       toast.success('Booking created successfully!');
       
-      // Navigate to payment page
-      setTimeout(() => {
-        navigate(`/customer/payment/${booking.id}`, {
-          state: { bookingData: booking }
-        });
-      }, 1500);
+      // Clear form data from localStorage after successful submission
+      localStorage.removeItem('bookingFormData');
+      localStorage.removeItem('bookingCurrentStep');
       
+      // Reset form
+      setForm(initialState);
     } catch (error) {
       console.error('Error creating booking:', error);
       
-      let errorMessage = 'Failed to create booking. Please try again.';
-      
+      // Handle different error scenarios
       if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
         console.error('Error response:', error.response.data);
-        errorMessage = error.response.data.message || errorMessage;
+        toast.error(`Booking failed: ${error.response.data.message || 'Server error'}`);
       } else if (error.request) {
         // The request was made but no response was received
         console.error('Error request:', error.request);
-        errorMessage = 'Network error. Please check your connection and try again.';
+        toast.error('Booking failed: No response from server');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error message:', error.message);
+        toast.error(`Booking failed: ${error.message}`);
       }
-      
-      toast.error(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
-  
+
   // Render vehicle selection step
   const renderVehicleSelection = () => {
     return (
@@ -540,7 +593,11 @@ const CustomerVanBooking = () => {
               >
                 <option value="">-- Select a vehicle --</option>
                 {vehicles.map(vehicle => (
-                  <option key={vehicle.id} value={vehicle.id.toString()}>
+                  <option 
+                    key={vehicle.id} 
+                    value={vehicle.id.toString()} 
+                    selected={parseInt(preSelectedVehicleId) === vehicle.id}
+                  >
                     {vehicle.brand} {vehicle.model} - ₱{vehicle.ratePerDay}/day - {vehicle.passengerCapacity} passengers
                   </option>
                 ))}
