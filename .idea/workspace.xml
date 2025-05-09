@@ -6,13 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="5bda11a3-5a14-4b6c-a819-0ef630706e94" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/dto/UserResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/dto/UserResponseDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/model/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-booking-history.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-booking-history.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-dashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-van-booking.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-van-booking.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-user-management.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-user-management.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
