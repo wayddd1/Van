@@ -1,10 +1,12 @@
 package com.example.vanease.VanEase.controller;
 
 import com.example.vanease.VanEase.exception.ErrorResponse;
+import com.example.vanease.VanEase.dto.GoogleAuthRequest;
 import com.example.vanease.VanEase.dto.LoginRequest;
 import com.example.vanease.VanEase.dto.RegisterRequest;
 import com.example.vanease.VanEase.model.Role;
 import com.example.vanease.VanEase.security.service.AuthService;
+import com.example.vanease.VanEase.security.service.GoogleAuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,6 +28,7 @@ import java.util.Map;
 public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final AuthService authService;
+    private final GoogleAuthService googleAuthService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
@@ -95,5 +98,21 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("No refresh token provided"));
+    }
+    
+    @Operation(summary = "Google OAuth Authentication", description = "Authenticate user with Google OAuth credentials")
+    @PostMapping("/google")
+    public ResponseEntity<?> googleAuthentication(@RequestBody GoogleAuthRequest request) {
+        try {
+            log.info("Google authentication attempt received");
+            ResponseEntity<?> response = googleAuthService.authenticateWithGoogle(request);
+            log.info("Google authentication successful");
+            return response;
+        } catch (Exception e) {
+            log.error("Google authentication failed: {}", e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("Google authentication failed: " + e.getMessage()));
+        }
     }
 }

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './customer-payment-confirm.css';
 
 const CustomerPaymentConfirm = () => {
   const { state } = useLocation();
@@ -45,7 +46,7 @@ const CustomerPaymentConfirm = () => {
         if (!token) {
           console.warn('No authentication token found, redirecting to login');
           toast.error('Please log in to continue with payment confirmation');
-          navigate('/auth/login', { 
+          navigate('/login', { 
             state: { 
               returnTo: '/customer/payment-confirm',
               bookingData: state?.bookingData 
@@ -75,7 +76,7 @@ const CustomerPaymentConfirm = () => {
     if (paymentData && bookingData && !isProcessing) {
       confirmPayment();
     }
-  }, [paymentData, bookingData]);
+  }, [paymentData, bookingData, isProcessing]);
 
   // Function to update booking status in the database
   const updateBookingStatus = async (bookingId, status) => {
@@ -210,113 +211,97 @@ const CustomerPaymentConfirm = () => {
   };
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-md-8">
-          <div className="card shadow-lg border-0 rounded-3">
-            <div className="card-header bg-primary text-white py-3">
-              <h3 className="mb-0 fw-bold">Payment Confirmation</h3>
+    <div className="confirm-container">
+      <div className="confirm-card">
+        <div className="confirm-header">
+          <h2 className="confirm-title">Payment Confirmation</h2>
+        </div>
+        <div className="confirm-body">
+          {status === 'processing' && (
+            <div className="processing-container">
+              <div className="spinner"></div>
+              <h3 className="processing-title">Processing Your Payment</h3>
+              <p className="processing-message">Please wait while we confirm your payment...</p>
             </div>
-            
-            <div className="card-body p-4">
-              {status === 'processing' && (
-                <div className="text-center py-5">
-                  <div className="spinner-border text-primary mb-3" role="status" style={{ width: '3rem', height: '3rem' }}>
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <h4 className="mt-3">Processing your payment...</h4>
-                  <p className="text-muted">Please wait while we confirm your transaction.</p>
-                </div>
-              )}
+          )}
+          
+          {status === 'success' && (
+            <div className="success-container">
+              <div className="success-icon">
+                <i className="bi bi-check-circle-fill"></i>
+              </div>
+              <h3 className="success-title">Payment Successful!</h3>
+              <p className="success-message">{message}</p>
               
-              {status === 'success' && (
-                <div className="text-center py-4">
-                  <div className="mb-4">
-                    <i className="bi bi-check-circle-fill text-success" style={{ fontSize: '5rem' }}></i>
+              {paymentDetails && (
+                <div className="payment-details-card">
+                  <h4 className="details-title">Payment Details</h4>
+                  <div className="details-row">
+                    <span className="details-label">Amount:</span>
+                    <span className="details-value amount">₱{paymentDetails.amount}</span>
                   </div>
-                  <h3 className="mb-3">{message}</h3>
-                  
-                  {paymentDetails && (
-                    <div className="payment-details mt-4 mb-4">
-                      <div className="card bg-light">
-                        <div className="card-body">
-                          <h5 className="card-title mb-3">Payment Details</h5>
-                          <div className="row mb-2">
-                            <div className="col-6 text-start">Payment Method:</div>
-                            <div className="col-6 text-end fw-bold">{paymentDetails.paymentMethod.replace('_', ' ')}</div>
-                          </div>
-                          <div className="row mb-2">
-                            <div className="col-6 text-start">Amount:</div>
-                            <div className="col-6 text-end fw-bold">₱{paymentDetails.amount}</div>
-                          </div>
-                          <div className="row mb-2">
-                            <div className="col-6 text-start">Status:</div>
-                            <div className="col-6 text-end">
-                              <span className="badge bg-success">Confirmed</span>
-                            </div>
-                          </div>
-                          <div className="row mb-2">
-                            <div className="col-6 text-start">Date:</div>
-                            <div className="col-6 text-end">{new Date().toLocaleDateString()}</div>
-                          </div>
-                          {paymentDetails.transactionId && (
-                            <div className="row mb-2">
-                              <div className="col-6 text-start">Transaction ID:</div>
-                              <div className="col-6 text-end text-truncate">{paymentDetails.transactionId}</div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                  <div className="details-row">
+                    <span className="details-label">Status:</span>
+                    <span className="status-badge status-confirmed">Confirmed</span>
+                  </div>
+                  <div className="details-row">
+                    <span className="details-label">Date:</span>
+                    <span className="details-value">{new Date().toLocaleDateString()}</span>
+                  </div>
+                  {paymentDetails.transactionId && (
+                    <div className="details-row">
+                      <span className="details-label">Transaction ID:</span>
+                      <span className="details-value">{paymentDetails.transactionId}</span>
                     </div>
                   )}
-                  
-                  <div className="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
-                    <button 
-                      className="btn btn-primary btn-lg px-4" 
-                      onClick={() => navigate('/customer/dashboard')}
-                    >
-                      <i className="bi bi-house-door me-2"></i>
-                      Go to Dashboard
-                    </button>
-                    <button 
-                      className="btn btn-outline-secondary btn-lg px-4" 
-                      onClick={() => navigate('/customer/booking')}
-                    >
-                      <i className="bi bi-plus-circle me-2"></i>
-                      Book Another Van
-                    </button>
-                  </div>
                 </div>
               )}
               
-              {status === 'error' && (
-                <div className="text-center py-4">
-                  <div className="mb-4">
-                    <i className="bi bi-x-circle-fill text-danger" style={{ fontSize: '5rem' }}></i>
-                  </div>
-                  <h3 className="mb-3">Payment Failed</h3>
-                  <p className="text-muted mb-4">{message}</p>
-                  
-                  <div className="d-grid gap-2 d-md-flex justify-content-md-center">
-                    <button 
-                      className="btn btn-danger btn-lg px-4" 
-                      onClick={() => navigate(-1)}
-                    >
-                      <i className="bi bi-arrow-counterclockwise me-2"></i>
-                      Try Again
-                    </button>
-                    <button 
-                      className="btn btn-outline-secondary btn-lg px-4" 
-                      onClick={() => navigate('/customer/dashboard')}
-                    >
-                      <i className="bi bi-house-door me-2"></i>
-                      Go to Dashboard
-                    </button>
-                  </div>
-                </div>
-              )}
+              <div className="action-buttons">
+                <button 
+                  className="btn btn-primary" 
+                  onClick={() => navigate('/customer/dashboard')}
+                >
+                  <i className="bi bi-house-door btn-icon"></i>
+                  Go to Dashboard
+                </button>
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={() => navigate('/customer/booking')}
+                >
+                  <i className="bi bi-plus-circle btn-icon"></i>
+                  Book Another Van
+                </button>
+              </div>
             </div>
-          </div>
+          )}
+          
+          {status === 'error' && (
+            <div className="error-container">
+              <div className="error-icon">
+                <i className="bi bi-x-circle-fill"></i>
+              </div>
+              <h3 className="error-title">Payment Failed</h3>
+              <p className="error-message">{message}</p>
+              
+              <div className="action-buttons">
+                <button 
+                  className="btn btn-danger" 
+                  onClick={() => navigate(-1)}
+                >
+                  <i className="bi bi-arrow-counterclockwise btn-icon"></i>
+                  Try Again
+                </button>
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={() => navigate('/customer/dashboard')}
+                >
+                  <i className="bi bi-house-door btn-icon"></i>
+                  Go to Dashboard
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

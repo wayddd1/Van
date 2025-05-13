@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { createPayment } from '../../api/payments';
-import { uploadProof } from '../../api/upload';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './customer-payment.css';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 
 const PAYMENT_METHODS = [
@@ -61,7 +60,7 @@ function CustomerPayment() {
         if (!token) {
           console.warn('No authentication token found, redirecting to login');
           toast.error('Please log in to continue with payment');
-          navigate('/auth/login', { 
+          navigate('/login', { 
             state: { 
               returnTo: `/customer/payment/${bookingId}`,
               bookingData: state?.bookingData 
@@ -287,56 +286,64 @@ function CustomerPayment() {
   
   if (!bookingId && !bookingInfo) {
     return (
-      <div className="container py-4">
-        <div className="alert alert-danger">
-          <i className="bi bi-exclamation-triangle me-2"></i>
-          No booking information available. Please start from the booking page.
+      <div className="payment-container">
+        <div className="payment-card">
+          <div className="payment-body">
+            <div className="alert alert-danger">
+              <div className="alert-icon">
+                <i className="bi bi-exclamation-triangle-fill"></i>
+              </div>
+              <div className="alert-content">
+                <h3 className="alert-title">No Booking Found</h3>
+                <p className="alert-text">No booking information available. Please start from the booking page.</p>
+              </div>
+            </div>
+            <button 
+              className="btn btn-primary btn-lg" 
+              onClick={() => navigate('/customer/booking')}
+            >
+              <i className="bi bi-calendar-plus btn-icon"></i>
+              Go to Booking Page
+            </button>
+          </div>
         </div>
-        <button 
-          className="btn btn-primary mt-3" 
-          onClick={() => navigate('/customer/booking')}
-        >
-          Go to Booking Page
-        </button>
       </div>
     );
   }
 
   return (
-    <div className="container py-4">
-      <div className="row">
-        <div className="col-md-8 mx-auto">
-          <div className="card shadow-lg rounded-3 border-0 mb-4">
-            <div className="card-header bg-primary text-white py-3">
-              <h4 className="mb-0 fw-bold">Make a Payment</h4>
-              {bookingInfo && (
-                <p className="mb-0 mt-2 text-white-50">
-                  Booking: {bookingInfo.vehicleName} ({bookingInfo.date} to {bookingInfo.endDate})
-                </p>
-              )}
-            </div>
-            <div className="card-body p-4">
+    <div className="payment-container">
+      <div className="payment-card">
+        <div className="payment-header">
+          <h2>Make a Payment</h2>
+          {bookingInfo && (
+            <p>
+              Booking: {bookingInfo.vehicleName} ({bookingInfo.date} to {bookingInfo.endDate})
+            </p>
+          )}
+        </div>
+        <div className="payment-body">
               <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label htmlFor="amount" className="form-label fw-bold">Amount (PHP)</label>
+                <div className="form-group">
+                  <label htmlFor="amount" className="form-label">Amount (PHP)</label>
                   <div className="input-group">
-                    <span className="input-group-text bg-light">₱</span>
+                    <span className="input-group-text">₱</span>
                     <input
                       type="number"
-                      className="form-control form-control-lg bg-light"
+                      className="form-control"
                       id="amount"
                       value={amount}
                       readOnly
                       disabled
                     />
                   </div>
-                  <small className="text-muted">Amount is fixed based on your booking</small>
+                  <div className="form-text">Amount is fixed based on your booking</div>
                 </div>
                 
-                <div className="mb-4">
-                  <label htmlFor="paymentMethod" className="form-label fw-bold">Payment Method</label>
+                <div className="form-group">
+                  <label htmlFor="paymentMethod" className="form-label">Payment Method</label>
                   <select
-                    className="form-select form-select-lg mb-2"
+                    className="form-select"
                     id="paymentMethod"
                     value={paymentMethod}
                     onChange={e => setPaymentMethod(e.target.value)}
@@ -347,60 +354,74 @@ function CustomerPayment() {
                       </option>
                     ))}
                   </select>
-                  <div className="payment-method-icons d-flex gap-3 mt-2">
-                    <div className={`payment-icon p-2 rounded ${paymentMethod === 'CASH_ON_HAND' ? 'border border-primary' : 'border'}`}>
-                      <i className="bi bi-cash-coin fs-2 text-success"></i>
+                  <div className="payment-methods">
+                    <div 
+                      className={`payment-method-option ${paymentMethod === 'CASH_ON_HAND' ? 'selected' : ''}`}
+                      onClick={() => setPaymentMethod('CASH_ON_HAND')}
+                    >
+                      <i className="bi bi-cash-coin payment-method-icon text-success"></i>
+                      <span className="payment-method-label">Cash</span>
                     </div>
-                    <div className={`payment-icon p-2 rounded ${paymentMethod === 'GCASH' ? 'border border-primary' : 'border'}`}>
-                      <i className="bi bi-phone fs-2 text-primary"></i>
+                    <div 
+                      className={`payment-method-option ${paymentMethod === 'GCASH' ? 'selected' : ''}`}
+                      onClick={() => setPaymentMethod('GCASH')}
+                    >
+                      <i className="bi bi-phone payment-method-icon text-primary"></i>
+                      <span className="payment-method-label">GCash</span>
                     </div>
-                    <div className={`payment-icon p-2 rounded ${paymentMethod === 'PAYPAL' ? 'border border-primary' : 'border'}`}>
-                      <i className="bi bi-credit-card fs-2 text-info"></i>
+                    <div 
+                      className={`payment-method-option ${paymentMethod === 'PAYPAL' ? 'selected' : ''}`}
+                      onClick={() => setPaymentMethod('PAYPAL')}
+                    >
+                      <i className="bi bi-credit-card payment-method-icon text-info"></i>
+                      <span className="payment-method-label">PayPal</span>
                     </div>
                   </div>
                 </div>
                 
                 {paymentMethod === 'PAYPAL' && (
-                  <div className="mb-4 p-3 bg-light rounded">
-                    <h5 className="mb-3">Pay with PayPal</h5>
-                    <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "PHP" }}>
-                      <PayPalButtons 
-                        style={{ layout: "vertical" }}
-                        createOrder={(data, actions) => {
-                          return actions.order.create({
-                            purchase_units: [
-                              {
-                                amount: {
-                                  value: amount,
-                                  currency_code: "PHP"
+                  <div className="payment-method-section">
+                    <h3>Pay with PayPal</h3>
+                    <div className="paypal-container">
+                      <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "PHP" }}>
+                        <PayPalButtons 
+                          style={{ layout: "vertical" }}
+                          createOrder={(data, actions) => {
+                            return actions.order.create({
+                              purchase_units: [
+                                {
+                                  amount: {
+                                    value: amount,
+                                    currency_code: "PHP"
+                                  },
+                                  description: `Payment for booking ${bookingId || state?.bookingData?.bookingId}`
                                 },
-                                description: `Payment for booking ${bookingId || state?.bookingData?.bookingId}`
-                              },
-                            ],
-                          });
-                        }}
-                        onApprove={(data, actions) => {
-                          return actions.order.capture().then((details) => {
-                            console.log('PayPal transaction completed', details);
-                            setTransactionId(details.id);
-                            // Auto-submit the form after PayPal payment
-                            handleSubmit(new Event('submit'));
-                          });
-                        }}
-                      />
-                    </PayPalScriptProvider>
+                              ],
+                            });
+                          }}
+                          onApprove={(data, actions) => {
+                            return actions.order.capture().then((details) => {
+                              console.log('PayPal transaction completed', details);
+                              setTransactionId(details.id);
+                              // Auto-submit the form after PayPal payment
+                              handleSubmit(new Event('submit'));
+                            });
+                          }}
+                        />
+                      </PayPalScriptProvider>
+                    </div>
                   </div>
                 )}
                 
                 {paymentMethod === 'GCASH' && (
-                  <div className="mb-4 p-3 bg-light rounded">
-                    <h5 className="mb-3">GCash Payment</h5>
+                  <div className="payment-method-section">
+                    <h3>GCash Payment</h3>
                     <p>Please send your payment to: <strong>09123456789</strong></p>
-                    <div className="mb-3">
-                      <label htmlFor="proofFile" className="form-label fw-bold">Upload GCash Payment Proof</label>
+                    <div className="file-upload-container">
+                      <label htmlFor="proofFile" className="form-label">Upload GCash Payment Proof</label>
                       <input
                         type="file"
-                        className="form-control form-control-lg"
+                        className="file-upload-input"
                         id="proofFile"
                         accept="image/*"
                         onChange={e => setProofFile(e.target.files[0])}
@@ -409,12 +430,11 @@ function CustomerPayment() {
                       <div className="form-text">Upload a screenshot of your GCash payment receipt.</div>
                     </div>
                     {proofFile && (
-                      <div className="mt-2 text-center">
+                      <div className="file-upload-preview">
                         <img 
                           src={URL.createObjectURL(proofFile)} 
                           alt="Payment proof preview" 
-                          className="img-thumbnail" 
-                          style={{ maxHeight: '200px' }} 
+                          className="preview-image" 
                         />
                       </div>
                     )}
@@ -422,14 +442,34 @@ function CustomerPayment() {
                 )}
                 
                 {paymentMethod === 'CASH_ON_HAND' && (
-                  <div className="alert alert-info mb-4 p-3">
-                    <div className="d-flex">
-                      <div className="me-3">
-                        <i className="bi bi-info-circle-fill fs-1 text-primary"></i>
+                  <div className="payment-method-section">
+                    <div className="alert alert-info">
+                      <div className="alert-icon">
+                        <i className="bi bi-info-circle-fill"></i>
                       </div>
-                      <div>
-                        <h5 className="alert-heading">Cash Payment</h5>
-                        <p className="mb-0">You will pay in cash when your booking is confirmed. Please prepare the exact amount of ₱{amount}.</p>
+                      <div className="alert-content">
+                        <h3 className="alert-title">Cash Payment</h3>
+                        <p className="alert-text">You will pay in cash when your booking is confirmed. Please prepare the exact amount of ₱{amount}.</p>
+                      </div>
+                    </div>
+                    
+                    <div className="payment-summary">
+                      <h4 className="payment-summary-title">Payment Summary</h4>
+                      <div className="payment-summary-item">
+                        <span className="payment-summary-label">Booking ID</span>
+                        <span className="payment-summary-value">#{bookingId || state?.bookingData?.bookingId}</span>
+                      </div>
+                      <div className="payment-summary-item">
+                        <span className="payment-summary-label">Vehicle</span>
+                        <span className="payment-summary-value">{bookingInfo?.vehicleName || 'Selected Vehicle'}</span>
+                      </div>
+                      <div className="payment-summary-item">
+                        <span className="payment-summary-label">Payment Method</span>
+                        <span className="payment-summary-value">Cash on Hand</span>
+                      </div>
+                      <div className="payment-summary-item payment-summary-total">
+                        <span className="payment-summary-label">Total Amount</span>
+                        <span className="payment-summary-value">₱{amount}</span>
                       </div>
                     </div>
                   </div>
@@ -438,17 +478,17 @@ function CustomerPayment() {
                 {paymentMethod !== 'PAYPAL' && (
                   <button 
                     type="submit" 
-                    className="btn btn-primary btn-lg w-100 py-3 mt-3" 
+                    className="btn btn-primary btn-lg btn-block" 
                     disabled={loading}
                   >
                     {loading ? (
                       <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span className="spinner" role="status" aria-hidden="true"></span>
                         Processing...
                       </>
                     ) : (
                       <>
-                        <i className="bi bi-check-circle-fill me-2"></i>
+                        <i className="bi bi-check-circle-fill btn-icon"></i>
                         Confirm Payment
                       </>
                     )}
@@ -456,46 +496,38 @@ function CustomerPayment() {
                 )}
                 
                 {error && (
-                  <div className="alert alert-danger mt-4">
-                    <div className="d-flex">
-                      <div className="me-3">
-                        <i className="bi bi-exclamation-triangle-fill fs-3 text-danger"></i>
-                      </div>
-                      <div>
-                        <h5 className="alert-heading">Payment Error</h5>
-                        <p className="mb-0">{error}</p>
-                      </div>
+                  <div className="alert alert-danger">
+                    <div className="alert-icon">
+                      <i className="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div className="alert-content">
+                      <h3 className="alert-title">Payment Error</h3>
+                      <p className="alert-text">{error}</p>
                     </div>
                   </div>
                 )}
               </form>
             </div>
           </div>
-        </div>
-      </div>
       
-      <div className="row mt-4">
-        <div className="col-md-8 mx-auto">
-          <div className="d-flex justify-content-between">
+          <div className="navigation-buttons">
             <button 
-              className="btn btn-outline-secondary" 
+              className="btn btn-secondary" 
               onClick={() => navigate('/customer/booking')}
             >
-              <i className="bi bi-arrow-left me-2"></i>
+              <i className="bi bi-arrow-left btn-icon"></i>
               Back to Booking
             </button>
             
             <button 
-              className="btn btn-outline-primary" 
+              className="btn btn-primary" 
               onClick={() => navigate('/customer/dashboard')}
             >
-              <i className="bi bi-house me-2"></i>
+              <i className="bi bi-house btn-icon"></i>
               Dashboard
             </button>
           </div>
-        </div>
       </div>
-    </div>
   );
 }
 

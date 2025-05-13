@@ -44,109 +44,77 @@ axiosInstance.interceptors.response.use(
       const storedRefreshToken = localStorage.getItem('refreshToken');
       
       try {
-        // Validate tokens
-        if (!storedRefreshToken) {
-          console.warn('No refresh token available, using stored token as fallback');
-          // If we don't have a refresh token but have a token, try using that
-          if (storedToken) {
-            console.log('Using existing token as fallback');
-            // Create a new axios instance to avoid interceptor loops
-            const plainAxios = axios.create();
-            originalRequest.headers['Authorization'] = `Bearer ${storedToken}`;
-            return plainAxios(originalRequest);
-          }
+        // Check if we have valid tokens
+        if (!storedRefreshToken && !storedToken) {
           throw new Error('No authentication tokens available');
         }
-        
-        console.log('Attempting to refresh token with:', storedRefreshToken.substring(0, 15) + '...');
-        
-        // Use a direct fetch call to avoid circular dependencies with axios interceptors
-        const refreshResponse = await fetch('http://localhost:8080/api/auth/refresh', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${storedToken}` // Use the access token, not refresh token
-          },
-          body: JSON.stringify({ refreshToken: storedRefreshToken }),
-          credentials: 'include'
-        });
-        
-        console.log('Token refresh status:', refreshResponse.status);
-        
-        if (!refreshResponse.ok) {
-          console.warn(`Refresh failed with status: ${refreshResponse.status}`);
-          // Try with existing token instead of throwing
-          if (storedToken) {
-            console.log('Refresh failed, using existing token as fallback');
-            // Create a new axios instance to avoid interceptor loops
-            const plainAxios = axios.create();
-            originalRequest.headers['Authorization'] = `Bearer ${storedToken}`;
-            return plainAxios(originalRequest);
+
+        // First try to refresh if we have a refresh token
+        if (storedRefreshToken) {
+          console.log('Attempting to refresh token...');
+          
+          // Use a direct fetch call to avoid circular dependencies with axios interceptors
+          const refreshResponse = await fetch('http://localhost:8080/api/auth/refresh', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ refreshToken: storedRefreshToken }),
+            credentials: 'include'
+          });
+          
+          console.log('Token refresh status:', refreshResponse.status);
+          
+          if (refreshResponse.ok) {
+            const data = await refreshResponse.json();
+            if (data && (data.token || data.accessToken)) {
+              const newToken = data.token || data.accessToken;
+              localStorage.setItem('token', newToken);
+              
+              // Update axiosInstance default headers
+              axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+              originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+              
+              // Retry the original request with new token
+              const plainAxios = axios.create();
+              return plainAxios(originalRequest);
+            }
           }
-          throw new Error(`Refresh failed with status: ${refreshResponse.status}`);
         }
-        
-        // If we get here, the request was successful
-        const data = await refreshResponse.json();
-        console.log('Token refresh response:', data);
-        
-        if (data && (data.token || data.accessToken)) {
-          const newToken = data.token || data.accessToken;
-          localStorage.setItem('token', newToken);
-          
-          // Update axiosInstance default headers
-          axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-          
-          // Restore original headers first, then update with new token
-          originalRequest.headers = { ...originalHeaders };
-          originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-          
-          // Make sure to create a new axios instance to avoid circular interceptors
+
+        // If refresh failed or we don't have refresh token, try existing token
+        if (storedToken) {
+          console.log('Using existing token as fallback');
           const plainAxios = axios.create();
+          originalRequest.headers['Authorization'] = `Bearer ${storedToken}`;
           return plainAxios(originalRequest);
-        } else {
-          console.warn('Invalid token response, using existing token as fallback');
-          // Try with existing token instead of throwing
-          if (storedToken) {
-            // Create a new axios instance to avoid interceptor loops
-            const plainAxios = axios.create();
-            originalRequest.headers['Authorization'] = `Bearer ${storedToken}`;
-            return plainAxios(originalRequest);
-          }
-          throw new Error('Invalid token response');
         }
+
+        // If we get here and have no valid tokens, reject the request
+        throw new Error('No valid authentication tokens available');
       } catch (refreshError) {
         console.error('Token refresh failed:', refreshError);
         
-        // Try to use the existing token as a fallback
+        // If we have a token and haven't tried it yet as fallback
         if (storedToken && !originalRequest._tokenFallbackAttempted) {
-          console.log('Trying existing token as fallback...');
+          console.log('Using existing token as fallback after refresh error');
           originalRequest._tokenFallbackAttempted = true;
           
-          // Restore original headers first, then update with existing token
-          originalRequest.headers = { ...originalHeaders };
-          originalRequest.headers['Authorization'] = `Bearer ${storedToken}`;
-          
-          // Use a new axios instance without interceptors to avoid infinite loop
+          // Create a new axios instance to avoid interceptor loops
           const plainAxios = axios.create();
-          try {
-            return await plainAxios(originalRequest);
-          } catch (fallbackError) {
-            console.error('Fallback request also failed:', fallbackError);
-          }
+          originalRequest.headers['Authorization'] = `Bearer ${storedToken}`;
+          return plainAxios(originalRequest);
         }
         
-        // If we have user data in localStorage, use it as a fallback
-        // This allows the UI to still show user info even if API calls fail
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          console.log('Using stored user data as fallback');
-          // Don't clear tokens - let the user stay logged in with cached data
-          return Promise.reject(error);
-        }
+        // If we get here, both refresh and token fallback failed
+        // Clear auth data and redirect to login
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
         
-        // If all attempts fail, don't clear auth data here
+        window.location.href = '/login';
+        return Promise.reject(new Error('Authentication failed'));
         // Let the user stay logged in with invalid tokens until they manually log out
       }
     }
@@ -342,26 +310,24 @@ export const AuthProvider = ({ children }) => {
       const storedToken = localStorage.getItem('token');
       
       if (!storedRefreshToken) {
-        console.warn('No refresh token available, skipping refresh');
-        return null;
+        console.warn('No refresh token available');
+        return storedToken || null;
       }
-      
-      console.log('Attempting to refresh token with:', storedRefreshToken.substring(0, 15) + '...');
       
       // Use fetch instead of axios to avoid interceptor loops
       const refreshResponse = await fetch('http://localhost:8080/api/auth/refresh', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${storedToken}` // Use the access token, not refresh token
+          'Accept': 'application/json'
         },
         body: JSON.stringify({ refreshToken: storedRefreshToken }),
         credentials: 'include'
       });
       
       if (!refreshResponse.ok) {
-        throw new Error(`Refresh failed with status: ${refreshResponse.status}`);
+        console.warn(`Refresh failed with status: ${refreshResponse.status}`);
+        return storedToken || null;
       }
       
       // If we get here, the request was successful
@@ -376,12 +342,17 @@ export const AuthProvider = ({ children }) => {
         axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
         return newToken;
       } else {
-        console.warn('Invalid token response, but not forcing logout');
-        return null;
+        console.warn('Invalid token response, using existing token');
+        return storedToken || null;
       }
     } catch (error) {
       console.error('Token refresh error:', error);
-      // Don't force logout on refresh failure, let the user continue with existing token
+      // On refresh failure, try to continue with existing token
+      const existingToken = localStorage.getItem('token');
+      if (existingToken) {
+        console.log('Using existing token after refresh failure');
+        return existingToken;
+      }
       return null;
     }
   };
@@ -396,6 +367,60 @@ export const AuthProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [token]);
 
+  // Function to handle Google login
+  const googleLogin = async (credential) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Use a plain axios instance to avoid interceptor loops
+      const plainAxios = axios.create({
+        baseURL: 'http://localhost:8080',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      
+      const response = await plainAxios.post('/api/auth/google', { credential });
+      
+      console.log('Google login response:', response);
+      
+      const data = response.data;
+      const accessToken = data.accessToken || data.token;
+      const refreshToken = data.refreshToken;
+      const userData = data.user || {};
+      
+      if (accessToken) {
+        // Store auth data in localStorage
+        localStorage.setItem('token', accessToken);
+        if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        // Update auth context state
+        setUser(userData);
+        setRole(userData.role || 'CUSTOMER');
+        setToken(accessToken);
+        setIsAuthenticated(true);
+        
+        // Set token in axios default headers
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+        
+        console.log('Google login successful, user role:', userData.role || 'CUSTOMER');
+        return data;
+      } else {
+        throw new Error('Invalid Google login response - no token received');
+      }
+    } catch (error) {
+      console.error('Google login error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Google login failed';
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -408,6 +433,7 @@ export const AuthProvider = ({ children }) => {
         error,
         isAuthenticated: !!token,
         fetchUserProfile,
+        googleLogin,
       }}
     >
       {children}

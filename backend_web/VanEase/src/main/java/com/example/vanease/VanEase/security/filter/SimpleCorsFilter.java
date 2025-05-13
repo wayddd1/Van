@@ -1,4 +1,4 @@
-package com.example.vanease.VanEase.filter;
+package com.example.vanease.VanEase.security.filter;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;

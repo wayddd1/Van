@@ -26,10 +26,19 @@ const AppContent = () => {
   const { role } = useAuth();
   const location = useLocation();
   const isManagerRoute = location.pathname.startsWith('/manager');
+  
+  // Check if current path is an authentication page where navbar should be hidden
+  const isAuthPage = [
+    '/login',
+    '/register',
+    '/manager-register',
+    '/' // Root path also shows login
+  ].includes(location.pathname);
 
   return (
     <>
-      {isManagerRoute ? <ManagerNavbar role={role} /> : <Navbar role={role} />}
+      {/* Only show navbar if not on an auth page */}
+      {!isAuthPage && (isManagerRoute ? <ManagerNavbar role={role} /> : <Navbar role={role} />)}
 
       <Routes>
         {/* Customer Public Dashboard */}

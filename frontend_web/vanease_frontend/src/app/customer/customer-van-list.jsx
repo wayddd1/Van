@@ -22,11 +22,34 @@ const CustomerVanList = () => {
     const fetchVehicles = async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/vehicles/available");
+        // Get the token from localStorage
+        const token = localStorage.getItem('token');
+        
+        // Make the request with the Authorization header and proper CORS settings
+        const res = await fetch("http://localhost:8080/api/vehicles/available", {
+          method: 'GET',
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'include', // Include cookies if needed
+          mode: 'cors' // Explicitly set CORS mode
+        });
+        
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            console.error('Authentication error:', res.status);
+            // Don't redirect, just handle the error gracefully
+          }
+          throw new Error(`API error: ${res.status}`);
+        }
+        
         const data = await res.json();
         setVehicles(data);
         setFiltered(data);
-      } catch {
+      } catch (error) {
+        console.error('Error fetching vehicles:', error);
         setVehicles([]);
         setFiltered([]);
       } finally {

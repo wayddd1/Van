@@ -16,11 +16,16 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         
         // Allow specific origins - for development, we'll be more permissive
-        config.addAllowedOrigin("http://localhost:3000");
-        config.addAllowedOrigin("http://127.0.0.1:3000");
+        // Using setAllowedOrigins instead of addAllowedOrigin for better compatibility
+        config.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:5173",  // Vite default port
+            "http://127.0.0.1:5173"
+        ));
         
         // Allow all HTTP methods
-        config.addAllowedMethod("*");
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         
         // Allow all headers
         config.addAllowedHeader("*");
@@ -34,7 +39,9 @@ public class CorsConfig {
             "Access-Control-Expose-Headers",
             "Authorization",
             "Content-Type",
-            "X-Requested-With"
+            "X-Requested-With",
+            "Cache-Control",
+            "Pragma"
         ));
         
         // Allow credentials (cookies, authorization headers, etc.)

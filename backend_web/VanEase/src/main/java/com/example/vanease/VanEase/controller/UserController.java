@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -57,6 +58,19 @@ public class UserController {
     @PreAuthorize("hasRole('MANAGER')")
     public List<UserResponseDTO> getAllUsers() {
         return userService.getAllUsers();
+    }
+    
+    @Operation(summary = "Update user status - manager only")
+    @PatchMapping("/{userId}/status")
+    @PreAuthorize("hasRole('MANAGER')")
+    public UserResponseDTO updateUserStatus(
+            @PathVariable Long userId,
+            @RequestBody Map<String, String> statusUpdate) {
+        String newStatus = statusUpdate.get("status");
+        if (newStatus == null || newStatus.isEmpty()) {
+            throw new IllegalArgumentException("Status cannot be empty");
+        }
+        return userService.updateUserStatus(userId, newStatus);
     }
 
 }

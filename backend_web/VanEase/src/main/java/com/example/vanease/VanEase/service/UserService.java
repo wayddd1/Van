@@ -58,6 +58,28 @@ public class UserService {
             .map(this::mapToResponseDTO)
             .collect(Collectors.toList());
     }
+    
+    @Transactional
+    public UserResponseDTO updateUserStatus(Long userId, String status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        
+        // Update the user status based on the string value
+        switch (status.toUpperCase()) {
+            case "ACTIVE":
+                user.setEnabled(true);
+                break;
+            case "INACTIVE":
+            case "SUSPENDED":
+                user.setEnabled(false);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid status value: " + status);
+        }
+        
+        User savedUser = userRepository.save(user);
+        return mapToResponseDTO(savedUser);
+    }
 
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
