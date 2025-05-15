@@ -1,18 +1,21 @@
-FROM openjdk:17-jdk-slim
+FROM maven:3.8.6-openjdk-17-slim as build
 
 WORKDIR /app
 
 COPY backend_web/VanEase/pom.xml .
 COPY backend_web/VanEase/src ./src
-COPY backend_web/VanEase/.mvn ./mvn
-COPY backend_web/VanEase/.mvn/wrapper ./mvn/wrapper
-COPY backend_web/VanEase/mvnw .
 
 # Build the application
-RUN ./mvnw clean package -DskipTests
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+RUN mvn clean package -DskipTests
+
+FROM openjdk:17-jdk-slim
+
+WORKDIR /app
+
+# Copy the built JAR from the build stage
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
 # Run the application
-CMD ["java", "-cp", "target/dependency/*", "com.example.vanease.VanEase.VanEaseApplication"]
+CMD ["java", "-jar", "app.jar"]
