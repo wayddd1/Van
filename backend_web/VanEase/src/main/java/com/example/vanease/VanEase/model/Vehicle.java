@@ -73,7 +73,7 @@ public class Vehicle {
     private String description;
 
     @Lob
-    @Column(name = "image")
+    @Column(name = "image", columnDefinition = "MEDIUMBLOB")
     private byte[] image;
 
     @Column(name = "image_content_type")
