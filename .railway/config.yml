@@ -1,0 +1,4 @@
+build:
+  path: backend_web/VanEase
+  command: ./mvnw package
+  start: java -jar target/VanEase-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
