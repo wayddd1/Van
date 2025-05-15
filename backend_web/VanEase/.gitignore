@@ -31,3 +31,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Sensitive Configuration Files
+application.properties
+application.yml
+application-*.properties
+application-*.yml
+*.properties
+*.yml
+application-local.properties
+
+### IDE specific files
