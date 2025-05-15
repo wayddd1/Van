@@ -5,36 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5bda11a3-5a14-4b6c-a819-0ef630706e94" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/config/CorsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/config/CorsConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/config/WebSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/config/WebSecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/filter/SimpleCorsFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/security/filter/SimpleCorsFilter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/model/Vehicle.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/model/Vehicle.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/java/com/example/vanease/VanEase/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_web/VanEase/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend_web/VanEase/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/App.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/auth/login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/auth/login.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/auth/manager-register.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/auth/manager-register.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/auth/register.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/auth/register.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-dashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-payment-confirm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-payment-confirm.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-payment-summary.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-payment-summary.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-payment.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-payment.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-van-booking.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-van-booking.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-van-list.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-van-list.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-van-list.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/customer/customer-van-list.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-booking-management.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-booking-management.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-booking-management.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-booking-management.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-user-management.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/app/manager/manager-user-management.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/components/Footer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/components/Footer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/context/AuthContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/context/AuthContext.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend_web/vanease_frontend/src/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,22 +30,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:repackage].executor": "Run",
-    "Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:run].executor": "Run",
-    "Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:start].executor": "Run",
-    "Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:stop].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "integration",
-    "last_opened_file_path": "C:/Users/hp/Desktop/IT342-G3-VanEase",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.0"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:repackage].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:run].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:start].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.VanEase [org.springframework.boot:spring-boot-maven-plugin:3.4.4:stop].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;integration&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/hp/Desktop/IT342-G3-VanEase&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;
   }
-}]]></component>
+}</component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="5bda11a3-5a14-4b6c-a819-0ef630706e94" name="Changes" comment="" />
